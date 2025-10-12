@@ -48,12 +48,13 @@ import ButtonComponent from "@/common/components/ButtonComponent.vue";
 import CloseButton from "@/common/components/CloseButton.vue";
 import FormLine from "@/modules/auth/components/FormLine.vue";
 import { useAuthStore } from "@/modules/auth/authStore";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useProfileStore } from "@/modules/profile/profileStore";
 
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
 const email = ref("");
 const password = ref("");
@@ -94,7 +95,8 @@ async function onLogin() {
     const ok = await authStore.login(email.value.trim(), password.value);
     if (ok) {
       await profileStore.init();
-      await router.push("/");
+      const redirect = (route.query.redirect as string) || "/";
+      await router.replace(redirect);
     } else {
       errors.value.general = "Неверный e-mail или пароль.";
     }

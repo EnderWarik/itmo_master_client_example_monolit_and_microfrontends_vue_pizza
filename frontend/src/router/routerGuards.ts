@@ -13,7 +13,7 @@ export const authMiddleware = (to: RouteLocationNormalized) => {
   }
 
   if (!isPublicRoute(to) && !auth.isAuthenticated) {
-    return { path: "/login" };
+    return { path: "/login", query: { redirect: to.fullPath } };
   }
 
   return true;
