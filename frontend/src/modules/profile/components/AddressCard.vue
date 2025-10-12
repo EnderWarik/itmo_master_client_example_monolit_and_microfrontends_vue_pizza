@@ -68,12 +68,10 @@ defineEmits<{ edit: [] }>();
   border-radius: 50%;
   outline: none;
   background-color: ds-colors.$white;
-  background-image: url("/api/public/img/edit.svg");
+  background-image: url("@/assets/img/edit.svg");
   background-repeat: no-repeat;
   background-position: center;
 }
-
-/* stack inner content like in reference card */
 .card :global(div[class*="content"]) {
   display: block;
   padding: 0;

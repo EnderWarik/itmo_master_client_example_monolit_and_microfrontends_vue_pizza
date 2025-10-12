@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HeaderLayout from "@/layouts/HeaderLayout.vue";
-import SidebarLayout from "@/layouts/SidebarLayout.vue";
+import SidebarHeaderLayout from "@/layouts/SidebarHeaderLayout.vue";
 import { authMiddleware } from "@/router/routerGuards";
 
 const router = createRouter({
@@ -37,9 +37,8 @@ const router = createRouter({
       name: "orders",
       component: () => import("@/views/OrdersView.vue"),
       meta: {
-        layout: SidebarLayout,
+        layout: SidebarHeaderLayout,
         title: "История заказов",
-        logo: { src: "./src/assets/img/logo.svg", alt: "V!U!E! Pizza" },
         links: [
           { label: "История заказов", href: "/orders" },
           { label: "Мои данные", href: "/profile" },
@@ -51,9 +50,8 @@ const router = createRouter({
       name: "profile",
       component: () => import("@/views/ProfileView.vue"),
       meta: {
-        layout: SidebarLayout,
+        layout: SidebarHeaderLayout,
         title: "Мои данные",
-        logo: { src: "./src/assets/img/logo.svg", alt: "V!U!E! Pizza" },
         links: [
           { label: "История заказов", href: "/orders" },
           { label: "Мои данные", href: "/profile" },
