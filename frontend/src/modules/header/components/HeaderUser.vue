@@ -22,6 +22,7 @@
 <script setup lang="ts">
 import { IUserData } from "@/modules/profile/types/IUserData";
 import { useAuthStore } from "@/modules/auth/authStore";
+import router from "@/router";
 
 const props = defineProps<{
   user: IUserData | null;
@@ -31,6 +32,7 @@ const authStore = useAuthStore();
 
 async function onLogout() {
   await authStore.logout();
+  router.push("/");
 }
 </script>
 
