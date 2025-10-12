@@ -12,14 +12,15 @@
         ]"
       />
     </label>
-    <TextInput
-      v-model="phone"
-      name="tel"
-      placeholder="+7 999-999-99-99"
-      :class="$style.input"
-    >
-      <span>Контактный телефон:</span>
-    </TextInput>
+    <div :class="$style.inputRow">
+      <FormLine
+        v-model="phone"
+        name="tel"
+        label="Контактный телефон:"
+        :placeholder="'+71234567890'"
+        :error="errors.phone"
+      />
+    </div>
 
     <div v-if="delivery !== BaseDeliveryEnum.self" :class="$style.address">
       <span :class="$style.label">Адрес:</span>
@@ -29,6 +30,7 @@
         name="street"
         label="Улица*"
         :readonly="isReadonly"
+        :error="!isReadonly ? errors.street : null"
       />
       <FormLine
         v-model="house"
@@ -36,6 +38,7 @@
         label="Дом*"
         small
         :readonly="isReadonly"
+        :error="!isReadonly ? errors.house : null"
       />
       <FormLine
         v-model="apartment"
@@ -49,11 +52,10 @@
 </template>
 
 <script setup lang="ts">
-import TextInput from "@/common/components/TextInput.vue";
 import DropdownComponent from "@/common/components/DropdownComponent.vue";
 import FormLine from "@/modules/cart/components/FormLine.vue";
 import { IUserAddress } from "@/modules/profile/types/IUserAddress";
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { BaseDeliveryEnum } from "@/modules/cart/types/BaseDeliveryEnum";
 
 const delivery = defineModel<string>("delivery");
@@ -82,26 +84,65 @@ const selectedAddress = computed<IUserAddress | null>(() => {
 
 const isReadonly = computed(() => selectedAddress.value !== null);
 
-watch(
-  selectedAddress,
-  (addr) => {
-    if (addr) {
-      street.value = addr.street ?? "";
-      house.value = addr.building ?? "";
-      apartment.value = addr.flat ?? "";
-    } else {
-      if (
-        delivery.value === BaseDeliveryEnum.self ||
-        delivery.value === BaseDeliveryEnum.new
-      ) {
-        street.value = "";
-        house.value = "";
-        apartment.value = "";
-      }
+watch(selectedAddress, (addr) => {
+  if (addr) {
+    street.value = addr.street ?? "";
+    house.value = addr.building ?? "";
+    apartment.value = addr.flat ?? "";
+  } else {
+    if (
+      delivery.value === BaseDeliveryEnum.self ||
+      delivery.value === BaseDeliveryEnum.new
+    ) {
+      street.value = "";
+      house.value = "";
+      apartment.value = "";
     }
-  },
-  { immediate: true },
-);
+  }
+});
+
+const errors = ref<{ phone: string; street: string; house: string }>({
+  phone: "",
+  street: "",
+  house: "",
+});
+
+function normalizePhone(p: string): string {
+  const raw = String(p ?? "");
+  const cleaned = raw.replace(/\D/g, "");
+  return cleaned ? "+" + cleaned : "+";
+}
+function isValidPhone(p: string): boolean {
+  const digits = (p.match(/\d/g) || []).length;
+  return digits >= 8;
+}
+
+function hasAnyLetter(value: string): boolean {
+  return /[A-Za-zА-Яа-яЁё]/.test(value);
+}
+
+watch(phone, (val) => {
+  const normalized = normalizePhone(val as string);
+  errors.value.phone = !isValidPhone(normalized)
+    ? "Неверный формат телефона"
+    : "";
+});
+watch([() => delivery.value, () => street.value, () => house.value], () => {
+  if (delivery.value === BaseDeliveryEnum.new) {
+    const streetTrimmed = street.value.trim();
+    if (!streetTrimmed) {
+      errors.value.street = "Укажите улицу";
+    } else if (!hasAnyLetter(streetTrimmed)) {
+      errors.value.street = "Улица должна содержать хотя бы одну букву";
+    } else {
+      errors.value.street = "";
+    }
+    errors.value.house = !house.value.trim() ? "Укажите дом" : "";
+  } else {
+    errors.value.street = "";
+    errors.value.house = "";
+  }
+});
 </script>
 
 <style module lang="scss">
@@ -141,10 +182,20 @@ watch(
   flex-wrap: wrap;
 }
 .inputRow {
-  flex-grow: 1;
-  margin-bottom: 20px;
+  position: relative;
+  margin-left: auto;
 }
 .small {
   max-width: 120px;
 }
+.error {
+  @include ds-typography.r-s14-h16;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -18px;
+  margin: 0;
+  color: ds-colors.$orange-100;
+}
+/* remove duplicate error style block */
 </style>
