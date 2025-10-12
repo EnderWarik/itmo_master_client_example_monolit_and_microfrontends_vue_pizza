@@ -4,11 +4,11 @@ import { IPizzaSauce } from "@/modules/pizza/types/IPizzaSauce";
 import { IPizzaIngredient } from "@/modules/pizza/types/IPizzaIngredient";
 import { IAdditionalCartItem } from "@/modules/cart/types/IAdditionalCartItem";
 import {
-  IApiOrderGetResponse,
   IApiOrderAddress,
-  IApiOrderPizzaIngredient,
-  IApiOrderPizza,
+  IApiOrderGetResponse,
   IApiOrderMisc,
+  IApiOrderPizza,
+  IApiOrderPizzaIngredient,
 } from "@/modules/order/types/api/IApiOrderGetResponse";
 import { IUserAddress } from "@/modules/profile/types/IUserAddress";
 import { IPizzaItem } from "@/modules/pizza/types/IPizzaItem";
@@ -164,7 +164,7 @@ export function mapApiOrderToOrder(
     extras: extrasMapped,
     address,
     deliveryType: opts.deliveryType ?? "delivery",
-    phone: opts.phone ?? "",
+    phone: api.phone,
     total,
   };
 }

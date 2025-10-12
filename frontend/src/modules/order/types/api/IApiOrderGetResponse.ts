@@ -1,6 +1,7 @@
 export interface IApiOrderGetResponse {
   id: number;
   userId: string;
+  phone: string;
   addressId: number;
   orderPizzas: IApiOrderPizza[];
   orderMisc: IApiOrderMisc[];

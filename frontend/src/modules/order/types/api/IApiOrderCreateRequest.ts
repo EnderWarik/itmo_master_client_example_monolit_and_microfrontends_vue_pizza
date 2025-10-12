@@ -6,7 +6,7 @@ export interface IApiOrderCreateRequest {
     building: string;
     flat?: string;
     comment?: string;
-  };
+  } | null;
   pizzas: Array<{
     name: string;
     sauceId: number;

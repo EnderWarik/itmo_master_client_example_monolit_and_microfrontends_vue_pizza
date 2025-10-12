@@ -39,7 +39,7 @@ export const useCartStore = defineStore("cartStore", () => {
   function addPizzaItem(item: IPizzaItem) {
     cartItems.value.push(item);
   }
-  const userPhone = ref<string>(profileStore.user?.phone || "");
+  const userPhone = ref<string>("");
   function resetCart(): void {
     cartItems.value = [];
     extras.value = extras.value.map((e) => ({ ...e, count: 0 }));
@@ -55,6 +55,7 @@ export const useCartStore = defineStore("cartStore", () => {
         ...item,
         count: 0,
       }));
+      userPhone.value = profileStore.user?.phone || "";
     } finally {
       isLoadingExtras.value = false;
     }
@@ -71,7 +72,7 @@ export const useCartStore = defineStore("cartStore", () => {
       building: string;
       flat?: string;
       comment?: string;
-    } = form;
+    } | null = null;
 
     if (currentDelivery.value === BaseDeliveryEnum.new) {
       addressPayload = {
@@ -136,6 +137,34 @@ export const useCartStore = defineStore("cartStore", () => {
 
     if (order.phone) {
       userPhone.value = order.phone;
+    }
+
+    if (!order.address) {
+      currentDelivery.value = BaseDeliveryEnum.self;
+      const form = profileStore.addressForm;
+      form.street = "";
+      form.building = "";
+      form.flat = "";
+      form.comment = "";
+    } else {
+      const matched = profileStore.addresses.find(
+        (a) => a.id === order.address!.id,
+      );
+      if (matched) {
+        currentDelivery.value = matched.id.toString();
+        const form = profileStore.addressForm;
+        form.street = matched.street;
+        form.building = matched.building;
+        form.flat = matched.flat || "";
+        form.comment = matched.comment || "";
+      } else {
+        currentDelivery.value = BaseDeliveryEnum.new;
+        const form = profileStore.addressForm;
+        form.street = order.address.street;
+        form.building = order.address.building;
+        form.flat = order.address.flat || "";
+        form.comment = order.address.comment || "";
+      }
     }
   }
 

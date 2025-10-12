@@ -15,21 +15,28 @@ const links = computed(
 <template>
   <div>
     <HeaderContainer />
-    <SidebarNav :width="180" :links="links" />
-    <div :class="$style.content">
-      <div v-if="title" :class="$style.title">
-        <h1>{{ title }}</h1>
+    <div :class="$style.main">
+      <SidebarNav :width="180" :links="links" />
+      <div :class="$style.content">
+        <div v-if="title" :class="$style.title">
+          <h1>{{ title }}</h1>
+        </div>
+        <slot />
       </div>
-      <slot />
     </div>
   </div>
 </template>
 
 <style module lang="scss">
+.main {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
 .content {
+  flex: 1 1 auto;
   padding-top: 22px;
   padding-right: 2.12%;
-  padding-left: 200px;
 }
 .title {
   margin-bottom: 27px;

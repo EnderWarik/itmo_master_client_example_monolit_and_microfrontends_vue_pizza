@@ -39,10 +39,7 @@ const {
 @use "@/assets/scss/ds-system/ds-typography";
 
 .sidebar {
-  position: fixed;
-  z-index: 2;
-  left: 0;
-  height: calc(100% - var(--sidebar-top, 0px));
+  position: static;
   background-color: rgba(ds-colors.$green-500, 0.05);
 }
 
