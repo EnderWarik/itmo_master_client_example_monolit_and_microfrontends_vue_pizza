@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import RadioComponent from "@/common/components/RadioComponent.vue";
+import { RadioComponent } from "@pizza/shared";
 
 const modelValue = defineModel<boolean | number | string | null>({
   default: false,
@@ -34,9 +34,9 @@ defineProps<{
 </script>
 
 <style module lang="scss">
-@use "@/assets/scss/ds-system/ds-shadows";
-@use "@/assets/scss/ds-system/ds-typography";
-@use "@/assets/scss/mixins/m_center";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-shadows";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-typography";
+@use "@pizza/shared/src/assets/scss/mixins/m_center";
 
 .option {
   position: relative;

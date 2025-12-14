@@ -17,7 +17,7 @@ onMounted(async () => {
 </script>
 
 <style lang="scss">
-@use "@/assets/scss/app" as *;
+@use "@pizza/shared/src/assets/scss/app" as *;
 </style>
 
 <style module lang="scss">

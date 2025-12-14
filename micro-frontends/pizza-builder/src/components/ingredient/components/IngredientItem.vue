@@ -21,8 +21,8 @@
 
 <script setup lang="ts">
 import { IPizzaIngredient } from "@/components/types/IPizzaIngredient";
-import CounterComponent from "@/common/components/CounterComponent.vue";
-import DragComponent from "@/common/components/DragComponent.vue";
+import { CounterComponent } from "@pizza/shared";
+import { DragComponent } from "@pizza/shared";
 
 defineProps<{
   ingredient: IPizzaIngredient;
@@ -32,9 +32,9 @@ const modelValue = defineModel<number>({ default: 0 });
 </script>
 
 <style module lang="scss">
-@use "@/assets/scss/ds-system/ds-colors";
-@use "@/assets/scss/ds-system/ds-typography";
-@use "@/assets/scss/mixins/m_center";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-colors";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-typography";
+@use "@pizza/shared/src/assets/scss/mixins/m_center";
 
 .counter {
   width: 54px;

@@ -44,9 +44,9 @@ function getIngredientName(path: string): string {
 </script>
 
 <style module lang="scss">
-@use "@/assets/scss/ds-system/ds-colors";
-@use "@/assets/scss/ds-system/ds-typography";
-@use "@/assets/scss/mixins/m_center";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-colors";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-typography";
+@use "@pizza/shared/src/assets/scss/mixins/m_center";
 
 .container {
   width: 315px;

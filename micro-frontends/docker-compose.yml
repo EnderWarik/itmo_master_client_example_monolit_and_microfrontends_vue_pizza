@@ -35,13 +35,12 @@ services:
 
   pizza-builder:
     build:
-      context: ./pizza-builder
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: pizza-builder/Dockerfile.dev
     ports:
-      - "127.0.0.1:5002:5002"
+      - "5002:5002"
     volumes:
       - ./pizza-builder/src:/app/src
-      - ./shared:/app/shared
     environment:
       - VITE_API_URL=http://localhost:3000
     networks:

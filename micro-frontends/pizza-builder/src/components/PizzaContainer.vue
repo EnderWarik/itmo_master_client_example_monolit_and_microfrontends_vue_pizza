@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import TitleComponent from "@/common/components/TitleComponent.vue";
+import { TitleComponent } from "@pizza/shared";
 import DoughSelector from "@/components/dough/DoughSelector.vue";
 import SizeSelector from "@/components/size/SizeSelector.vue";
 import IngredientsSelector from "@/components/ingredient/IngredientsSelector.vue";

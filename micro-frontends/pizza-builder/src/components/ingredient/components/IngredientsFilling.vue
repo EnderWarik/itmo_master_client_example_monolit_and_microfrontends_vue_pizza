@@ -23,8 +23,8 @@ const ingredients = defineModel<IPizzaIngredient[]>("ingredients", {
 });
 </script>
 <style module lang="scss">
-@use "@/assets/scss/ds-system/ds-typography";
-@use "@/assets/scss/mixins/m_clear-list";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-typography";
+@use "@pizza/shared/src/assets/scss/mixins/m_clear-list";
 
 .item {
   width: 100px;

@@ -18,7 +18,7 @@
 import { PizzaDoughEnum } from "@/types/enums/PizzaDoughEnum";
 import { IPizzaDough } from "@/components/types/IPizzaDough";
 import DoughOption from "@/components/dough/components/DoughOption.vue";
-import SheetComponent from "@/common/components/SheetComponent.vue";
+import { SheetComponent } from "@pizza/shared";
 
 const modelValue = defineModel<number | null>();
 

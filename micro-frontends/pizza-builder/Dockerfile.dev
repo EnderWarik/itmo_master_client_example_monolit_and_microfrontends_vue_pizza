@@ -1,10 +1,18 @@
-FROM node:20-alpine
+FROM node:20
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
-COPY . .
+# Copy package files
+COPY pizza-builder/package.json ./
+
+# Install dependencies
+RUN npm cache clean --force && rm -f package-lock.json && npm install
+
+# Copy @pizza packages
+COPY packages/shared /app/node_modules/@pizza/shared
+
+# Copy source files
+COPY pizza-builder/ .
 
 EXPOSE 5002
 

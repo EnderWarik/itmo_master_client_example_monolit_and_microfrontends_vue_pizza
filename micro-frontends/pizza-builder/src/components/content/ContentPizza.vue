@@ -25,10 +25,10 @@
   </div>
 </template>
 <script setup lang="ts">
-import TextInput from "@/common/components/TextInput.vue";
+import { TextInput } from "@pizza/shared";
 import ContentResult from "@/components/content/ContentResult.vue";
 import PizzaConstructor from "@/components/content/PizzaConstructor.vue";
-import DropComponent from "@/common/components/DropComponent.vue";
+import { DropComponent } from "@pizza/shared";
 import { IPizzaIngredient } from "@/components/types/IPizzaIngredient";
 
 const pizzaName = defineModel<string>("pizzaName");

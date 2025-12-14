@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import SheetComponent from "@/common/components/SheetComponent.vue";
+import { SheetComponent } from "@pizza/shared";
 import IngredientsFilling from "@/components/ingredient/components/IngredientsFilling.vue";
 import IngredientsSauce from "@/components/ingredient/components/IngredientsSauce.vue";
 

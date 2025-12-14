@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import ButtonComponent from "@/common/components/ButtonComponent.vue";
+import { ButtonComponent } from "@pizza/shared";
 
 defineProps<{
   total: number;
@@ -24,7 +24,7 @@ const emit = defineEmits<{ submit: [] }>();
 </script>
 
 <style module lang="scss">
-@use "@/assets/scss/ds-system/ds-typography";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-typography";
 .result {
   display: flex;
   align-items: center;

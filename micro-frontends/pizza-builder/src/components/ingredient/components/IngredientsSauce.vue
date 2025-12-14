@@ -14,15 +14,15 @@
   </div>
 </template>
 <script setup lang="ts">
-import RadioComponent from "@/common/components/RadioComponent.vue";
+import { RadioComponent } from "@pizza/shared";
 import { IPizzaSauce } from "@/components/types/IPizzaSauce";
 
 defineProps<{ sauces: IPizzaSauce[] }>();
 const modelValue = defineModel<string | number | null>();
 </script>
 <style module lang="scss">
-@use "@/assets/scss/ds-system/ds-typography";
-@use "@/assets/scss/mixins/m_clear-list";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-typography";
+@use "@pizza/shared/src/assets/scss/mixins/m_clear-list";
 
 .sauce {
   display: flex;

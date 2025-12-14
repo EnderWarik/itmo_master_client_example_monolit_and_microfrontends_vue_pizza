@@ -14,7 +14,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import SheetComponent from "@/common/components/SheetComponent.vue";
+import { SheetComponent } from "@pizza/shared";
 import { IPizzaSize } from "@/components/types/IPizzaSize";
 import SizeOption from "@/components/size/components/SizeOption.vue";
 import { PizzaSizeEnum } from "@/types/enums/PizzaSizeEnum";
