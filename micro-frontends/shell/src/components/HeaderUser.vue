@@ -1,12 +1,58 @@
 <template>
   <div :class="$style.user">
-    <router-link to="/login" :class="$style.login">
+    <router-link v-if="!user" to="/login" :class="$style.login">
       <span>Войти</span>
+    </router-link>
+    <router-link v-else to="/profile" :class="$style.profile">
+      <picture>
+        <source type="image/webp" :srcset="user.avatar">
+        <img :src="user.avatar" :alt="user.name" width="32" height="32">
+      </picture>
+      <span>{{ user.name }}</span>
     </router-link>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { initAuth } from 'auth/entry';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+const user = ref<User | null>(null);
+
+function setUser(event: Event) {
+  const detail = (event as CustomEvent).detail;
+  user.value = detail;
+}
+
+function clearUser() {
+  user.value = null;
+}
+
+onMounted(async () => {
+  window.addEventListener('auth:login-success', setUser);
+  window.addEventListener('auth:close', clearUser);
+  
+  try {
+    const currentUser = await initAuth();
+    if (currentUser) {
+      user.value = currentUser;
+    }
+  } catch (e) {
+    console.error('Failed to init auth in HeaderUser', e);
+  }
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('auth:login-success', setUser);
+  window.removeEventListener('auth:close', clearUser);
+});
 </script>
 
 <style module lang="scss">
@@ -56,6 +102,16 @@
     vertical-align: middle;
     background: url("@/assets/img/login.svg") no-repeat center;
     background-size: auto 50%;
+  }
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  img {
+    border-radius: 50%;
   }
 }
 </style>

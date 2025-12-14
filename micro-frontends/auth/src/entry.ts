@@ -16,3 +16,10 @@ export function unmount() {
         app = null;
     }
 }
+
+export async function initAuth() {
+    const { useAuthStore } = await import("@/stores/authStore");
+    const authStore = useAuthStore();
+    await authStore.checkAuth();
+    return authStore.user;
+}

@@ -1,4 +1,4 @@
-import { init, loadRemote as loadRemoteMF } from '@module-federation/runtime';
+import { init, registerRemotes, loadRemote as loadRemoteMF } from '@module-federation/runtime';
 import type { App } from 'vue';
 import type { RemoteConfig } from '@/config/remotes';
 
@@ -13,16 +13,19 @@ export interface MfeModule {
  */
 export const federationPlugin = {
     install: (_app: App, remotes: RemoteConfig[]) => {
-        const mfRemotes = remotes.map((remote) => ({
+        // Auth инициализируется статически через vite.config.ts,
+        // поэтому исключаем его из динамической инициализации чтобы избежать конфликтов
+        const dynamicRemotes = remotes.filter(r => r.name !== 'auth');
+
+        const mfRemotes = dynamicRemotes.map((remote) => ({
             name: remote.name,
             entry: remote.entry,
             type: 'module' as const,
         }));
 
-        init({
-            name: 'shell',
-            remotes: mfRemotes,
-        });
+        // Используем registerRemotes вместо init, так как init уже мог быть вызван
+        // (например, плагином Vite для статических remotes)
+        registerRemotes(mfRemotes);
     },
 };
 

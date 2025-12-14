@@ -9,7 +9,15 @@ export default defineConfig({
         federation({
             name: 'shell',
             filename: 'remoteEntry.js',
-            remotes: {},
+            remotes: {
+                auth: {
+                    type: 'module',
+                    name: 'auth',
+                    entry: 'http://localhost:5001/remoteEntry.js',
+                    external: 'http://localhost:5001/remoteEntry.js',
+                    shareScope: 'default'
+                },
+            },
             shared: {
                 vue: { singleton: true, requiredVersion: '^3.3.0' },
                 'vue-router': { singleton: true, requiredVersion: '^4.2.0' },

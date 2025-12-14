@@ -4,6 +4,7 @@ import App from './App.vue';
 import router from './router';
 import { federationPlugin } from './plugins/federationPlugin';
 import { remotes } from './config/remotes';
+import { initAuth } from 'auth/entry';
 
 const app = createApp(App);
 
@@ -12,6 +13,9 @@ app.use(federationPlugin, remotes);
 
 // Pinia для локального состояния Shell
 app.use(createPinia());
+
+// Инициализируем Auth MFE (eager loading)
+initAuth().catch(console.error);
 
 // Роутер
 app.use(router);

@@ -1,4 +1,5 @@
 import { httpClient } from "@/http/httpClient";
+import type { User } from "@/types/User";
 
 export interface ILoginRequest {
     email: string;
@@ -17,4 +18,8 @@ export const authApi = {
     async logout(): Promise<void> {
         await httpClient.delete<unknown, void>("/logout");
     },
+
+    async whoAmI(): Promise<User> {
+        return httpClient.get<unknown, User>("/whoAmI");
+    }
 };
