@@ -32,7 +32,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { TitleComponent, TextInput, ButtonComponent, CloseButton } from "@pizza/common";
+import { TitleComponent, TextInput, ButtonComponent, CloseButton } from "@pizza/shared";
 import FormLine from "@/components/FormLine.vue";
 import { useAuthStore } from "@/stores/authStore";
 import popupBg from "@/assets/img/popup.svg";
@@ -96,9 +96,9 @@ function onClose() {
 </script>
 
 <style module lang="scss">
-@use "@/assets/scss/ds-system/ds-colors";
-@use "@/assets/scss/ds-system/ds-shadows";
-@use "@/assets/scss/mixins/m_center";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-colors";
+@use "@pizza/shared/src/assets/scss/ds-system/ds-shadows";
+@use "@pizza/shared/src/assets/scss/mixins/m_center";
 
 .form {
   @include m_center.pf_center-all;

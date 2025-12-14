@@ -19,16 +19,15 @@ services:
 
   auth:
     build:
-      context: ./auth
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: auth/Dockerfile.dev
       extra_hosts:
         - "host.docker.internal:host-gateway"
     ports:
-      - "127.0.0.1:5001:5001"
+      - "5001:5001"
     volumes:
       - ./auth/src:/app/src
       - ./shared:/app/shared
-      - ./packages:/packages
     environment:
       - VITE_API_URL=http://localhost:3000
     networks:

@@ -2,10 +2,19 @@ FROM node:20
 
 WORKDIR /app
 
-COPY package.json .npmrc ./
+# Copy package files
+COPY auth/package.json ./
+COPY auth/.npmrc ./
+
+# Install dependencies
 RUN npm cache clean --force && rm -f package-lock.json && npm install
-COPY . .
+
+# Copy @pizza packages
+COPY packages/shared /app/node_modules/@pizza/shared
+
+# Copy source files
+COPY auth/ .
 
 EXPOSE 5001
 
-CMD ["sh", "-c", "mkdir -p /app/node_modules/@pizza && cp -r /packages/common /app/node_modules/@pizza/common && npm run dev -- --host 0.0.0.0"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
