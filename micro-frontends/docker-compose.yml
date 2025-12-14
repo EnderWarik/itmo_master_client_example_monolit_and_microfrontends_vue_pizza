@@ -4,7 +4,7 @@ services:
       context: ./shell
       dockerfile: Dockerfile.dev
     ports:
-      - "5010:5010"
+      - "127.0.0.1:5010:5010"
     volumes:
       - ./shell/src:/app/src
       - ./shared:/app/shared
@@ -21,11 +21,14 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile.dev
+      extra_hosts:
+        - "host.docker.internal:host-gateway"
     ports:
-      - "5001:5001"
+      - "127.0.0.1:5001:5001"
     volumes:
       - ./auth/src:/app/src
       - ./shared:/app/shared
+      - ./packages:/packages
     environment:
       - VITE_API_URL=http://localhost:3000
     networks:
@@ -36,7 +39,7 @@ services:
       context: ./pizza-builder
       dockerfile: Dockerfile.dev
     ports:
-      - "5002:5002"
+      - "127.0.0.1:5002:5002"
     volumes:
       - ./pizza-builder/src:/app/src
       - ./shared:/app/shared
@@ -60,7 +63,7 @@ services:
     build: ../backend
     command: npm start
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
       - db
     environment:
@@ -72,6 +75,20 @@ services:
     networks:
       - pizza-network
 
+  verdaccio:
+    image: verdaccio/verdaccio
+    container_name: pizza-npm-registry
+    ports:
+      - "127.0.0.1:4873:4873"
+    volumes:
+      - verdaccio-storage:/verdaccio/storage
+      - ./verdaccio/config.yaml:/verdaccio/conf/config.yaml
+    networks:
+      - pizza-network
+
 networks:
   pizza-network:
     driver: bridge
+
+volumes:
+  verdaccio-storage:

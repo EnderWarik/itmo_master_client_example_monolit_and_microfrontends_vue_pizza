@@ -32,10 +32,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import TitleComponent from "@/common/components/TitleComponent.vue";
-import TextInput from "@/common/components/TextInput.vue";
-import ButtonComponent from "@/common/components/ButtonComponent.vue";
-import CloseButton from "@/common/components/CloseButton.vue";
+import { TitleComponent, TextInput, ButtonComponent, CloseButton } from "@pizza/common";
 import FormLine from "@/components/FormLine.vue";
 import { useAuthStore } from "@/stores/authStore";
 import popupBg from "@/assets/img/popup.svg";

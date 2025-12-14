@@ -1,0 +1,23 @@
+storage: /verdaccio/storage
+auth:
+  htpasswd:
+    file: /verdaccio/storage/htpasswd
+    max_users: 100
+uplinks:
+  npmjs:
+    url: https://registry.npmjs.org/
+packages:
+  '@pizza/*':
+    access: $all
+    publish: $all
+    unpublish: $all
+  '**':
+    access: $all
+    proxy: npmjs
+middlewares:
+  audit:
+    enabled: true
+log:
+  type: stdout
+  format: pretty
+  level: http
