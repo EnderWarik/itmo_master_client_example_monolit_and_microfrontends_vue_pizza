@@ -129,7 +129,7 @@ const emits = defineEmits<{
 .arrow {
   &::before {
     content: "";
-    background-image: url("@/assets/img/button-arrow.svg");
+    background-image: url("../../assets/img/button-arrow.svg");
     background-position: center;
     background-repeat: no-repeat;
     margin-right: 16px;

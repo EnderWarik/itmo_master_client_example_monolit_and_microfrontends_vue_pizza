@@ -48,7 +48,7 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/MfeView.vue'),
         meta: {
             title: 'История заказов',
-            mfe: 'profile',
+            mfe: 'order',
         },
     },
     {

@@ -6,7 +6,7 @@ WORKDIR /app
 COPY pizza-builder/package.json ./
 
 # Install dependencies
-RUN npm cache clean --force && rm -f package-lock.json && npm install
+RUN npm install
 
 # Copy @pizza packages
 COPY packages/shared /app/node_modules/@pizza/shared

@@ -37,16 +37,16 @@ export const remotes: RemoteConfig[] = [
         title: 'Корзина',
     },
     {
-        name: 'order',
-        entry: `${getEnvUrl('VITE_ORDER_URL', 5004)}/remoteEntry.js`,
-        route: '/order',
-        title: 'Заказ',
-    },
-    {
         name: 'profile',
-        entry: `${getEnvUrl('VITE_PROFILE_URL', 5005)}/remoteEntry.js`,
+        entry: `${getEnvUrl('VITE_PROFILE_URL', 5004)}/remoteEntry.js`,
         route: '/profile',
         title: 'Профиль',
+    },
+    {
+        name: 'order',
+        entry: `${getEnvUrl('VITE_ORDER_URL', 5005)}/remoteEntry.js`,
+        route: '/orders',
+        title: 'История заказов',
     },
 ];
 

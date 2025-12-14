@@ -1,0 +1,20 @@
+FROM node:20
+
+WORKDIR /app
+
+# Copy package files
+COPY cart/package*.json ./
+COPY cart/.npmrc ./
+
+# Install dependencies
+RUN npm install
+
+# Copy @pizza packages (copy src/ content to match import paths)
+COPY packages/shared/src /app/node_modules/@pizza/shared
+
+# Copy source files
+COPY cart/ .
+
+EXPOSE 5003
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]

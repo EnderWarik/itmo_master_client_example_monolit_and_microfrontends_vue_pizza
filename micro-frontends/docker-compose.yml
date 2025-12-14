@@ -12,8 +12,7 @@ services:
       - VITE_AUTH_URL=http://localhost:5001
       - VITE_PIZZA_URL=http://localhost:5002
       - VITE_CART_URL=http://localhost:5003
-      - VITE_ORDER_URL=http://localhost:5004
-      - VITE_PROFILE_URL=http://localhost:5005
+      - VITE_PROFILE_URL=http://localhost:5004
     networks:
       - pizza-network
 
@@ -41,6 +40,45 @@ services:
       - "5002:5002"
     volumes:
       - ./pizza-builder/src:/app/src
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    networks:
+      - pizza-network
+
+  profile:
+    build:
+      context: .
+      dockerfile: profile/Dockerfile.dev
+    ports:
+      - "5004:5004"
+    volumes:
+      - ./profile/src:/app/src
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    networks:
+      - pizza-network
+
+  cart:
+    build:
+      context: .
+      dockerfile: cart/Dockerfile.dev
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./cart/src:/app/src
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    networks:
+      - pizza-network
+
+  order:
+    build:
+      context: .
+      dockerfile: order/Dockerfile.dev
+    ports:
+      - "5005:5005"
+    volumes:
+      - ./order/src:/app/src
     environment:
       - VITE_API_URL=http://localhost:3000
     networks:

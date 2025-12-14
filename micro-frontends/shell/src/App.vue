@@ -31,14 +31,20 @@ function onAuthClose() {
   router.push('/');
 }
 
+function goToCart() {
+  router.push('/cart');
+}
+
 onMounted(() => {
   window.addEventListener('auth:login-success', onLoginSuccess);
   window.addEventListener('auth:close', onAuthClose);
+  window.addEventListener('pizza:go-to-cart', goToCart);
 });
 
 onBeforeUnmount(() => {
   window.removeEventListener('auth:login-success', onLoginSuccess);
   window.removeEventListener('auth:close', onAuthClose);
+  window.removeEventListener('pizza:go-to-cart', goToCart);
 });
 </script>
 
