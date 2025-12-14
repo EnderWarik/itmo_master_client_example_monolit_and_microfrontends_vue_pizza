@@ -1,0 +1,25 @@
+{
+    "name": "pizza-shell",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vue-tsc --noEmit && vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@module-federation/runtime": "^0.8.0",
+        "pinia": "^2.1.7",
+        "vue": "^3.3.8",
+        "vue-router": "^4.2.5"
+    },
+    "devDependencies": {
+        "@module-federation/vite": "1.9.3",
+        "@vitejs/plugin-vue": "^5.2.4",
+        "sass": "^1.92.1",
+        "typescript": "^5.9.2",
+        "vite": "^6.2.5",
+        "vue-tsc": "^3.0.6"
+    }
+}

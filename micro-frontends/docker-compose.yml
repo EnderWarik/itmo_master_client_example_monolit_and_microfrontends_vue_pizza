@@ -1,0 +1,77 @@
+services:
+  shell:
+    build:
+      context: ./shell
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5010:5010"
+    volumes:
+      - ./shell/src:/app/src
+      - ./shared:/app/shared
+    environment:
+      - VITE_AUTH_URL=http://localhost:5001
+      - VITE_PIZZA_URL=http://localhost:5002
+      - VITE_CART_URL=http://localhost:5003
+      - VITE_ORDER_URL=http://localhost:5004
+      - VITE_PROFILE_URL=http://localhost:5005
+    networks:
+      - pizza-network
+
+  auth:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./auth/src:/app/src
+      - ./shared:/app/shared
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    networks:
+      - pizza-network
+
+  pizza-builder:
+    build:
+      context: ./pizza-builder
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./pizza-builder/src:/app/src
+      - ./shared:/app/shared
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    networks:
+      - pizza-network
+
+  db:
+    image: postgres
+    container_name: pizza-mfe-db
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: 'trust'
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: psql
+      POSTGRES_DB: pizza
+    networks:
+      - pizza-network
+
+  backend:
+    build: ../backend
+    command: npm start
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: pizza-mfe-db
+      DB_PORT: '5432'
+      DB_USER: postgres
+      DB_PASSWORD: psql
+      DB_NAME: pizza
+    networks:
+      - pizza-network
+
+networks:
+  pizza-network:
+    driver: bridge

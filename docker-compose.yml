@@ -3,13 +3,14 @@ version: '3'
 services:
   db:
     image: postgres
+    container_name: pizza-db
     environment:
       POSTGRES_HOST_AUTH_METHOD: 'trust'
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: psql
       POSTGRES_DB: pizza
-    ports:
-      - 127.0.0.1:5432:5432
+    networks:
+      - pizza
 
   backend:
     build: backend
@@ -19,26 +20,39 @@ services:
       - /backend/node_modules
     depends_on:
       - db
-    ports:
-      - 127.0.0.1:3000:3000
+    environment:
+      DB_HOST: pizza-db
+      DB_PORT: '5432'
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PASSWORD: psql
+      DB_NAME: pizza
+    networks:
+      - pizza
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.pizza-backend.loadbalancer.server.port=3000
+      - traefik.http.routers.pizza-backend.entrypoints=https
+      - traefik.http.routers.pizza-backend.rule=Host(`api.pizza.ew-production.ru`)
+      - traefik.http.routers.pizza-backend.tls=true
+      - traefik.http.routers.pizza-backend.tls.certresolver=le
+      - traefik.docker.network=pizza
 
   frontend:
     build:
       context: ./frontend
-#    https://github: com/vitejs/vite/issues/2671#issuecomment-829535806:
-    command: >
-      sh -lc "
-        npm ci --include=optional ||
-        npm i  --include=optional;
-        npm i -D @rollup/rollup-linux-arm64-gnu --no-save;
-        npm rebuild esbuild;
-        exec npm run dev
-      "
-    environment:
-      PORT: '8080'
-      HOST: '0.0.0.0'
-    ports:
-      - '127.0.0.1:8080:8080'
-    volumes:
-      - ./frontend:/frontend
-      - /frontend/node_modules
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+    networks:
+      - pizza
+    labels:
+      - traefik.enable=true
+      - traefik.http.services.pizza-frontend.loadbalancer.server.port=80
+      - traefik.http.routers.pizza-frontend.entrypoints=https
+      - traefik.http.routers.pizza-frontend.rule=Host(`pizza.ew-production.ru`)
+      - traefik.http.routers.pizza-frontend.tls=true
+      - traefik.http.routers.pizza-frontend.tls.certresolver=le
+      - traefik.docker.network=pizza
+
+networks:
+  pizza:
+    external: true
