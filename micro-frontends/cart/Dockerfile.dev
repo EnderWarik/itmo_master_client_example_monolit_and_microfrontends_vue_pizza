@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Copy package files
 COPY cart/package*.json ./
-COPY cart/.npmrc ./
 
 # Install dependencies
 RUN npm install

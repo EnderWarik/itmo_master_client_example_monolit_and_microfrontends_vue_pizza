@@ -5,6 +5,7 @@ import router from './router';
 import { federationPlugin } from './plugins/federationPlugin';
 import { remotes } from './config/remotes';
 import { initAuth } from 'auth/entry';
+import { preloadAllMfes } from './plugins/mfePreloader';
 
 const app = createApp(App);
 
@@ -21,3 +22,9 @@ initAuth().catch(console.error);
 app.use(router);
 
 app.mount('#app');
+
+// После монтирования предзагружаем все MFE модули в фоне
+// Это позволяет MFE общаться друг с другом через события
+setTimeout(() => {
+    preloadAllMfes().catch(console.error);
+}, 100);

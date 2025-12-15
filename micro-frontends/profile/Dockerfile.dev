@@ -4,7 +4,6 @@ WORKDIR /app
 
 # Copy package files (exclude package-lock.json to avoid Rollup arm64 issues)
 COPY profile/package.json ./
-COPY profile/.npmrc ./
 
 # Install dependencies fresh (fixes @rollup/rollup-linux-arm64-gnu issue)
 RUN npm install

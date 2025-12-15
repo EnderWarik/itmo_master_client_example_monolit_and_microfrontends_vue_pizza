@@ -4,24 +4,37 @@
     :style="{ width: width + 'px', top: top + 'px' }"
   >
     <nav :class="$style.nav">
-      <RouterLink
+      <a
         v-for="l in links"
         :key="l.href + l.label"
-        :to="l.href"
+        :href="l.href"
         :class="[$style.link, currentPath === l.href && $style.active]"
+        @click.prevent="navigate(l.href)"
       >
         {{ l.label }}
-      </RouterLink>
+      </a>
     </nav>
   </aside>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { ref, onMounted } from "vue";
 
-const route = useRoute();
-const currentPath = computed(() => route.path);
+const currentPath = ref(window.location.pathname);
+
+onMounted(() => {
+  // Update current path when window changes
+  window.addEventListener('popstate', () => {
+    currentPath.value = window.location.pathname;
+  });
+});
+
+function navigate(href: string) {
+  // Use native navigation for shell-level routing
+  window.history.pushState({}, '', href);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+  currentPath.value = href;
+}
 
 const {
   width = 180,

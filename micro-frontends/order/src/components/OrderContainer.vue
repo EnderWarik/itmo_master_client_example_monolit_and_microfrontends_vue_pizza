@@ -1,8 +1,10 @@
 <template>
   <main>
     <div v-if="orderStore.isLoading">Загрузка заказов...</div>
-    <template v-for="order in orderStore.orders" :key="order.id">
+    <template v-else-if="orderStore.orders.length > 0">
       <OrderCard
+        v-for="order in orderStore.orders"
+        :key="order.id"
         :order-number="order.id"
         :total="order.total"
         :products="order.pizzas"
@@ -12,6 +14,9 @@
         @repeat="repeatOrder(order)"
       />
     </template>
+    <div v-else :class="$style.empty">
+      У вас пока нет заказов
+    </div>
   </main>
 </template>
 <script setup lang="ts">
@@ -36,7 +41,7 @@ function repeatOrder(order: IOrder) {
   window.dispatchEvent(new CustomEvent("order:repeat", { detail: order }));
 }
 </script>
-<style scoped lang="scss">
+<style module lang="scss">
 @use "@pizza/shared/assets/scss/ds-system/ds-colors";
 @use "@pizza/shared/assets/scss/ds-system/ds-typography";
 
@@ -151,5 +156,12 @@ function repeatOrder(order: IOrder) {
   padding: 16px 10px;
 
   border-top: 1px solid rgba(ds-colors.$green-500, 0.1);
+}
+
+.empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: #888;
+  font-size: 16px;
 }
 </style>

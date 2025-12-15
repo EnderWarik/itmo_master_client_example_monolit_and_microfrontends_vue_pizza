@@ -3,7 +3,6 @@ FROM node:20
 WORKDIR /app
 
 COPY order/package.json ./
-COPY order/.npmrc ./
 
 RUN npm install
 

@@ -6,6 +6,7 @@ export interface MfeModule {
     name: string;
     mount: (container: HTMLElement) => void;
     unmount: () => void;
+    init?: () => void;
 }
 
 /**
@@ -37,6 +38,7 @@ export const loadRemote = async (moduleName: string): Promise<MfeModule | null> 
         const loadedModule = await loadRemoteMF<{
             mount: (container: HTMLElement) => void;
             unmount: () => void;
+            init?: () => void;
         }>(`${moduleName}/entry`);
 
         if (!loadedModule) {
@@ -48,6 +50,7 @@ export const loadRemote = async (moduleName: string): Promise<MfeModule | null> 
             name: moduleName,
             mount: loadedModule.mount,
             unmount: loadedModule.unmount,
+            init: loadedModule.init,
         };
     } catch (error) {
         console.error(`Error loading remote module ${moduleName}:`, error);

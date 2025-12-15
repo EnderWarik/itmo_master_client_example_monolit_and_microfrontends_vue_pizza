@@ -65,7 +65,6 @@ onBeforeUnmount(() => {
 
   a,
   div {
-    display: block;
     padding: 14px 20px;
     transition: 0.3s;
     background-color: ds-colors.$green-500;
@@ -108,6 +107,7 @@ onBeforeUnmount(() => {
 .profile {
   display: flex;
   align-items: center;
+  vertical-align: middle;
   gap: 8px;
 
   img {

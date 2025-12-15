@@ -4,7 +4,7 @@
       <span
         :class="$style.filling"
         :style="{
-          '--icon-url': `url(${image})`,
+          '--icon-url': `url(${fixedImage})`,
         }"
       >
         {{ ingredient.name }}
@@ -20,14 +20,19 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { IPizzaIngredient } from "@/components/types/IPizzaIngredient";
 import { CounterComponent } from "@pizza/shared";
 import { DragComponent } from "@pizza/shared";
 
-defineProps<{
+const props = defineProps<{
   ingredient: IPizzaIngredient;
   image: string;
 }>();
+
+// Strip /public prefix if present (backend returns paths like /public/img/...)
+const fixedImage = computed(() => props.image.replace(/^\/public/, ''));
+
 const modelValue = defineModel<number>({ default: 0 });
 </script>
 

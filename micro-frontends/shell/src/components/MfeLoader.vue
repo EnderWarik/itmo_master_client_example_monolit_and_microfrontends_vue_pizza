@@ -30,6 +30,8 @@ const mountModule = async () => {
   loading.value = true;
   error.value = null;
 
+  console.log('[MfeLoader] Mounting module:', props.moduleName);
+
   try {
     // Сначала размонтируем предыдущий модуль
     if (currentModule) {
@@ -37,16 +39,21 @@ const mountModule = async () => {
       currentModule = null;
     }
 
+    console.log('[MfeLoader] Loading remote:', props.moduleName);
     const module = await loadRemote(props.moduleName);
+    console.log('[MfeLoader] Loaded module:', module);
     
     if (module && mfeRoot.value) {
       currentModule = module;
       module.mount(mfeRoot.value);
+      console.log('[MfeLoader] Mounted:', props.moduleName);
     } else {
       error.value = `Модуль "${props.moduleName}" не найден`;
+      console.error('[MfeLoader] Module not found:', props.moduleName);
     }
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'Неизвестная ошибка';
+    console.error('[MfeLoader] Error:', e);
   } finally {
     loading.value = false;
   }
