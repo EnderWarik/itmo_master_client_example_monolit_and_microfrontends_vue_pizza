@@ -5,8 +5,8 @@
     </router-link>
     <router-link v-else to="/profile" :class="$style.profile">
       <picture>
-        <source type="image/webp" :srcset="user.avatar">
-        <img :src="user.avatar" :alt="user.name" width="32" height="32">
+        <source type="image/webp" :srcset="fixedAvatar">
+        <img :src="fixedAvatar" :alt="user.name" width="32" height="32">
       </picture>
       <span>{{ user.name }}</span>
     </router-link>
@@ -14,7 +14,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { initAuth } from 'auth/entry';
 
 interface User {
@@ -25,6 +25,12 @@ interface User {
 }
 
 const user = ref<User | null>(null);
+
+// Fix avatar path - strip /public prefix if present
+const fixedAvatar = computed(() => {
+  if (!user.value?.avatar) return '';
+  return user.value.avatar.replace(/^\/public/, '');
+});
 
 function setUser(event: Event) {
   const detail = (event as CustomEvent).detail;

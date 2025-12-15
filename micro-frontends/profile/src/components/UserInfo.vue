@@ -10,7 +10,7 @@
         :height="size"
       />
     </picture>
-    <img v-else :src="avatar" :alt="name" :width="size" :height="size" />
+    <img v-else :src="fixPath(avatar)" :alt="name" :width="size" :height="size" />
 
     <div :class="$style.name">
       <span>{{ name }}</span>
@@ -44,6 +44,12 @@ function toSrcset(pair?: Record<string, string>) {
       return density ? `${url} ${density}x` : url;
     })
     .join(", ");
+}
+
+// Fix avatar path - strip /public prefix if present
+function fixPath(path?: string) {
+  if (!path) return "";
+  return path.replace(/^\/public/, '');
 }
 </script>
 

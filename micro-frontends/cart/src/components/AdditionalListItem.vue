@@ -1,7 +1,7 @@
 <template>
   <SheetComponent tag="li" :class="$style.item">
     <p :class="$style.description">
-      <img :src="item.image" width="39" height="60" :alt="item.name" />
+      <img :src="fixedImage" width="39" height="60" :alt="item.name" />
       <span>{{ item.name }}</span>
     </p>
 
@@ -14,6 +14,7 @@
   </SheetComponent>
 </template>
 <script setup lang="ts">
+import { computed } from "vue";
 import CounterComponent from "@pizza/shared/common/components/CounterComponent.vue";
 import SheetComponent from "@pizza/shared/common/components/SheetComponent.vue";
 
@@ -21,7 +22,10 @@ import { IAdditionalCartItem } from "@/types/IAdditionalCartItem";
 
 const count = defineModel<number>("count");
 
-defineProps<{ item: IAdditionalCartItem }>();
+const props = defineProps<{ item: IAdditionalCartItem }>();
+
+// Fix image path - strip /public prefix if present
+const fixedImage = computed(() => props.item.image.replace(/^\/public/, ''));
 </script>
 
 <style module lang="scss">
