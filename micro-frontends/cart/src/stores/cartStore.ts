@@ -2,14 +2,40 @@ import { defineStore } from "pinia";
 import { computed, ref, watch } from "vue";
 import { IAdditionalCartItem } from "@/types/IAdditionalCartItem";
 import { cartApi } from "@/api/cartApi";
+import { orderApi } from "@/api/orderApi";
 import { BaseDeliveryEnum } from "@/types/BaseDeliveryEnum";
 
-// Simplified pizza item type for cart
+// Full pizza item type for cart (matches IPizzaItem structure)
 interface ICartPizzaItem {
   id: string;
   name: string;
   price: number;
   count: number;
+  size?: {
+    id: number;
+    name: string;
+    image: string;
+    multiplier: number;
+  };
+  dough?: {
+    id: number;
+    name: string;
+    image: string;
+    description: string;
+    price: number;
+  };
+  sauce?: {
+    id: number;
+    name: string;
+    price: number;
+  };
+  fillings?: {
+    id: number;
+    name: string;
+    price: number;
+    image: string;
+    count?: number;
+  }[];
   description?: string;
 }
 
@@ -26,9 +52,12 @@ export const useCartStore = defineStore("cartStore", () => {
     }
   }
 
-  // Save cart to localStorage
+  // Save cart to localStorage and notify shell
   function saveToStorage(items: ICartPizzaItem[]) {
     localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+    // Calculate and emit total for header
+    const total = items.reduce((sum, item) => sum + (item.price * item.count), 0);
+    window.dispatchEvent(new CustomEvent("cart:total-updated", { detail: { total } }));
   }
 
   const cartItems = ref<ICartPizzaItem[]>(loadFromStorage());
@@ -59,6 +88,15 @@ export const useCartStore = defineStore("cartStore", () => {
     extras.value.forEach((item) => (result += item.price * item.count));
     return result;
   });
+
+  // Watch extras for changes and emit total update
+  watch(
+    () => extras.value,
+    () => {
+      window.dispatchEvent(new CustomEvent("cart:total-updated", { detail: { total: totalPrice.value } }));
+    },
+    { deep: true }
+  );
 
   function addPizzaItem(item: ICartPizzaItem) {
     cartItems.value.push(item);
@@ -97,18 +135,34 @@ export const useCartStore = defineStore("cartStore", () => {
     }
   }
 
-  async function orderPizzas(address: {
+  async function orderPizzas(userId: string, address: {
     street: string;
     building: string;
     flat?: string;
     comment?: string;
-  }) {
-    // TODO: Implement order creation via orderApi
-    console.log("Order submitted:", {
-      items: cartItems.value,
-      extras: extras.value.filter((e) => e.count > 0),
-      address,
+  } | null) {
+    const pizzasPayload = cartItems.value.map((p) => ({
+      name: p.name,
+      sauceId: p.sauce?.id ?? 0,
+      doughId: p.dough?.id ?? 0,
+      sizeId: p.size?.id ?? 0,
+      quantity: p.count,
+      ingredients: (p.fillings ?? []).map((f) => ({
+        ingredientId: f.id,
+        quantity: f.count ?? 1,
+      })),
+    }));
+
+    const miscPayload = extras.value
+      .filter((e) => e.count > 0)
+      .map((e) => ({ miscId: e.id, quantity: e.count }));
+
+    await orderApi.createOrder({
+      userId,
       phone: userPhone.value,
+      address,
+      pizzas: pizzasPayload,
+      misc: miscPayload,
     });
 
     // Clear cart after order

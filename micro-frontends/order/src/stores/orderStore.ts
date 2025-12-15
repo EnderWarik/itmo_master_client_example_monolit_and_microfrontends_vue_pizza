@@ -11,27 +11,48 @@ export const useOrderStore = defineStore("orderStore", () => {
     try {
       isLoading.value = true;
       const apiOrders = await orderApi.getOrders();
-      // Simplified: just map API orders directly without complex transformations
-      orders.value = apiOrders.map((o: any) => ({
-        id: o.id,
-        userId: o.userId,
-        phone: o.phone,
-        address: o.addressId ? { id: o.addressId, street: "", building: "", flat: "", comment: "" } : null,
-        pizzas: o.orderPizzas?.map((p: any) => ({
+      // Map API orders - note: prices would need catalog lookup for accurate calculation
+      orders.value = apiOrders.map((o: any) => {
+        const pizzas = (o.orderPizzas || []).map((p: any) => ({
           id: p.id?.toString() || "",
           name: p.name || "Пицца",
           count: p.quantity || 1,
-          price: 0,
-          fillings: [],
-        })) || [],
-        extras: o.orderMisc?.map((m: any) => ({
+          price: 500, // Placeholder - real price requires size/dough/sauce/ingredient lookups
+          fillings: (p.ingredients || []).map((i: any) => ({
+            id: i.ingredientId,
+            name: "",
+            count: i.quantity || 1,
+          })),
+        }));
+
+        const extras = (o.orderMisc || []).map((m: any) => ({
           id: m.miscId,
-          name: m.name || "Доп. товар",
+          name: "Доп. товар",
           count: m.quantity || 1,
-          price: m.price || 0,
-        })) || [],
-        total: 0,
-      }));
+          price: 100, // Placeholder price
+        }));
+
+        // Calculate rough total
+        const pizzaTotal = pizzas.reduce((sum: number, p: any) => sum + p.price * p.count, 0);
+        const extrasTotal = extras.reduce((sum: number, e: any) => sum + e.price * e.count, 0);
+
+        return {
+          id: o.id,
+          userId: o.userId,
+          phone: o.phone,
+          address: o.orderAddress ? {
+            id: o.orderAddress.id,
+            street: o.orderAddress.street || "",
+            building: o.orderAddress.building || "",
+            flat: o.orderAddress.flat || "",
+            comment: o.orderAddress.comment || "",
+          } : null,
+          deliveryType: "delivery" as const,
+          pizzas,
+          extras,
+          total: pizzaTotal + extrasTotal,
+        };
+      });
     } catch (e) {
       console.error("Failed to load orders:", e);
       orders.value = [];

@@ -80,8 +80,9 @@ export const useProfileStore = defineStore("profileStore", () => {
         profileApi.getAddresses(),
       ]);
       user.value = userData;
-      const uid = user.value?.id;
-      addresses.value = fetchedAddresses.filter((a) => a.userId === uid);
+      const uid = user.value?.id?.toString();
+      // Filter addresses by userId (compare as strings to handle type mismatches)
+      addresses.value = fetchedAddresses.filter((a) => a.userId?.toString() === uid);
     } finally {
       isLoading.value = false;
     }

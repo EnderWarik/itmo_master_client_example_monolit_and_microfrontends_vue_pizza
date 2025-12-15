@@ -20,6 +20,10 @@ function handleAddToCart(event: Event) {
             name: pizza.name,
             price: pizza.price,
             count: pizza.count || 1,
+            size: pizza.size,
+            dough: pizza.dough,
+            sauce: pizza.sauce,
+            fillings: pizza.fillings,
             description: `${pizza.dough?.name}, ${pizza.sauce?.name}, ${pizza.fillings?.map((f: any) => f.name).join(', ')}`,
         });
         console.log('[Cart] Pizza added to cart:', pizza.name);

@@ -36,8 +36,10 @@
 import CartProduct from "./CartProduct.vue";
 import CounterComponent from "@pizza/shared/common/components/CounterComponent.vue";
 import ButtonComponent from "@pizza/shared/common/components/ButtonComponent.vue";
-import pizzaIcon from "@pizza/shared/assets/img/product.svg";
 import { IPizzaItem } from "@/types/pizza/IPizzaItem";
+
+// Use public path for pizza icon (works across all MFEs)
+const pizzaIcon = "/img/product.svg";
 
 const count = defineModel<number>("count");
 defineProps<{ item: IPizzaItem }>();

@@ -24,7 +24,9 @@
 import OrderProduct from "./OrderProduct.vue";
 import { computed } from "vue";
 import { IPizzaItem } from "@/types/pizza/IPizzaItem";
-import pizzaIcon from "@pizza/shared/assets/img/product.svg";
+
+// Use public path for pizza icon (works across all MFEs)
+const pizzaIcon = "/img/product.svg";
 
 const props = defineProps<{
   product: IPizzaItem;
@@ -44,6 +46,7 @@ const totalPrice = computed(() => props.product.price * props.product.count);
 .price {
   @include ds-typography.b-s16-h19;
   margin-left: auto;
+  padding-left: 15px;
   white-space: nowrap;
 }
 </style>

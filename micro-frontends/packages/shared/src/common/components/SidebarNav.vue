@@ -53,6 +53,7 @@ const {
 
 .sidebar {
   position: static;
+  flex-shrink: 0;
   background-color: rgba(ds-colors.$green-500, 0.05);
 }
 

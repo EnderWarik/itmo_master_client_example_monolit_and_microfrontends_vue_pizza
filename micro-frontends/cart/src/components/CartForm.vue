@@ -54,7 +54,7 @@
 <script setup lang="ts">
 import DropdownComponent from "@pizza/shared/common/components/DropdownComponent.vue";
 import FormLine from "@/components/FormLine.vue";
-import { IUserAddress } from "@/modules/profile/types/IUserAddress";
+import { type IAddress } from "@/api/profileApi";
 import { computed, ref, watch } from "vue";
 import { BaseDeliveryEnum } from "@/types/BaseDeliveryEnum";
 
@@ -72,10 +72,10 @@ const house = defineModel<string>("house", { default: "" });
 const apartment = defineModel<string>("apartment", { default: "" });
 
 const props = defineProps<{
-  addresses: IUserAddress[];
+  addresses: IAddress[];
 }>();
 
-const selectedAddress = computed<IUserAddress | null>(() => {
+const selectedAddress = computed<IAddress | null>(() => {
   const val = delivery.value;
   if (!val || val === BaseDeliveryEnum.self || val === BaseDeliveryEnum.new)
     return null;

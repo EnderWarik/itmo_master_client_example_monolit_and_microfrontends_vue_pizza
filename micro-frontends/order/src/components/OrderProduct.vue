@@ -11,8 +11,12 @@
       <h2 :class="$style.title">{{ name }}</h2>
 
       <p :class="$style.metaParagraph">
-        {{ size.name }}, на {{ dough.name }} тесте<br />
-        Соус: {{ sauce.name }}<br />
+        <template v-if="size || dough">
+          {{ size?.name || 'Стандартная' }}<template v-if="dough">, на {{ dough.name }} тесте</template><br />
+        </template>
+        <template v-if="sauce">
+          Соус: {{ sauce.name }}<br />
+        </template>
         <template v-if="fillings?.length">
           Начинка: {{ fillings.map((f) => f.name).join(", ") }}
         </template>
@@ -24,10 +28,11 @@
 import { IPizzaItem } from "@/types/pizza/IPizzaItem";
 
 defineProps<
-  Omit<IPizzaItem, "id" | "price"> & {
+  Partial<Omit<IPizzaItem, "id" | "price">> & {
+    name: string;
     img: string;
-    imgWidth: number;
-    imgHeight: number;
+    imgWidth?: number;
+    imgHeight?: number;
   }
 >();
 </script>
