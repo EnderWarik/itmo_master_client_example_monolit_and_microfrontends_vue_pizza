@@ -1,4 +1,4 @@
-import { httpClient } from "@/http/HttpClient";
+import { httpClient } from "@/http/httpClient";
 import {
   IApiPizzaDoughResponse,
   IApiPizzaIngredientResponse,

@@ -1,0 +1,278 @@
+version: "3.8"
+
+# Docker Compose with Traefik included
+# Full stack deployment for pizza project
+# PRODUCTION MODE: Only Traefik, DB, Backend, and Pizza Builder enabled
+
+services:
+  # ==================== TRAEFIK ====================
+  traefik:
+    image: traefik:v2.11
+    container_name: pizza-traefik
+    restart: always
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=admin@ew-production.ru"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./letsencrypt:/letsencrypt
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+
+  # ==================== DATABASE ====================
+  postgres:
+    image: postgres:15-alpine
+    container_name: pizza-db
+    restart: always
+    environment:
+      POSTGRES_USER: pizza
+      POSTGRES_PASSWORD: pizza_password
+      POSTGRES_DB: pizza
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pizza_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pizza"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== BACKEND ====================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pizza-backend
+    restart: always
+    environment:
+      HOST: "0.0.0.0" # Explicitly bind to all interfaces
+      DB_HOST: pizza-db
+      DB_PORT: 5432
+      DB_USER: pizza
+      DB_PASSWORD: pizza_password
+      DB_NAME: pizza
+      DATABASE_URL: postgres://pizza:pizza_password@pizza-db:5432/pizza
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.api.rule=Host(`api.pizza.ew-production.ru`)"
+      - "traefik.http.routers.api.entrypoints=websecure"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.tls.certresolver=letsencrypt"
+      - "traefik.http.services.api.loadbalancer.server.port=3000"
+      # CORS for Backend
+      - "traefik.http.middlewares.api-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.api-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.api-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.api.middlewares=api-cors"
+
+  # ==================== MFE: PIZZA BUILDER (PROD MODE) ====================
+  pizza-builder:
+    build:
+      # Change context to parent directory to access packages/shared
+      context: ./micro-frontends
+      dockerfile: pizza-builder/Dockerfile.prod
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+        VITE_BASE_URL: https://builder.pizza.ew-production.ru/
+    container_name: mfe-pizza-builder
+    restart: always
+    # No volumes for code, only Nginx serving static files
+    networks:
+      - pizza_net
+    # No command needed, using default Nginx CMD
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.builder.rule=Host(`builder.pizza.ew-production.ru`)"
+      - "traefik.http.routers.builder.entrypoints=websecure"
+      - "traefik.http.routers.builder.tls=true"
+      - "traefik.http.routers.builder.tls.certresolver=letsencrypt"
+      - "traefik.http.services.builder.loadbalancer.server.port=80" # Nginx port
+      - "traefik.http.middlewares.builder-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.builder-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.builder-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.builder.middlewares=builder-cors"
+
+  # ==================== MFE: AUTH (PROD MODE) ====================
+  auth:
+    build:
+      context: ./micro-frontends
+      dockerfile: auth/Dockerfile.prod
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+        VITE_BASE_URL: https://auth.pizza.ew-production.ru/
+    container_name: mfe-auth
+    restart: always
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.auth.rule=Host(`auth.pizza.ew-production.ru`)"
+      - "traefik.http.routers.auth.entrypoints=websecure"
+      - "traefik.http.routers.auth.tls=true"
+      - "traefik.http.routers.auth.tls.certresolver=letsencrypt"
+      - "traefik.http.services.auth.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.auth-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.auth-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.auth-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.auth.middlewares=auth-cors"
+
+  # ==================== MFE: CART (PROD MODE) ====================
+  cart:
+    build:
+      context: ./micro-frontends
+      dockerfile: cart/Dockerfile.prod
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+        VITE_BASE_URL: https://cart.pizza.ew-production.ru/
+    container_name: mfe-cart
+    restart: always
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.cart.rule=Host(`cart.pizza.ew-production.ru`)"
+      - "traefik.http.routers.cart.entrypoints=websecure"
+      - "traefik.http.routers.cart.tls=true"
+      - "traefik.http.routers.cart.tls.certresolver=letsencrypt"
+      - "traefik.http.services.cart.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.cart-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.cart-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.cart-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.cart.middlewares=cart-cors"
+
+  # ==================== MFE: PROFILE (PROD MODE) ====================
+  profile:
+    build:
+      context: ./micro-frontends
+      dockerfile: profile/Dockerfile.prod
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+        VITE_BASE_URL: https://profile.pizza.ew-production.ru/
+    container_name: mfe-profile
+    restart: always
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.profile.rule=Host(`profile.pizza.ew-production.ru`)"
+      - "traefik.http.routers.profile.entrypoints=websecure"
+      - "traefik.http.routers.profile.tls=true"
+      - "traefik.http.routers.profile.tls.certresolver=letsencrypt"
+      - "traefik.http.services.profile.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.profile-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.profile-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.profile-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.profile.middlewares=profile-cors"
+
+  # ==================== MFE: ORDER (PROD MODE) ====================
+  order:
+    build:
+      context: ./micro-frontends
+      dockerfile: order/Dockerfile.prod
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+        VITE_BASE_URL: https://order.pizza.ew-production.ru/
+    container_name: mfe-order
+    restart: always
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.order.rule=Host(`order.pizza.ew-production.ru`)"
+      - "traefik.http.routers.order.entrypoints=websecure"
+      - "traefik.http.routers.order.tls=true"
+      - "traefik.http.routers.order.tls.certresolver=letsencrypt"
+      - "traefik.http.services.order.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.order-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.order-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.order-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.order.middlewares=order-cors"
+
+  # ==================== MFE: SHELL (PROD MODE) ====================
+  shell:
+    build:
+      context: ./micro-frontends
+      dockerfile: shell/Dockerfile.prod
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+        VITE_AUTH_URL: https://auth.pizza.ew-production.ru
+        VITE_CART_URL: https://cart.pizza.ew-production.ru
+        VITE_PROFILE_URL: https://profile.pizza.ew-production.ru
+        VITE_ORDER_URL: https://order.pizza.ew-production.ru
+        VITE_PIZZA_BUILDER_URL: https://builder.pizza.ew-production.ru
+        VITE_BASE_URL: https://micro.pizza.ew-production.ru/
+    container_name: mfe-shell
+    restart: always
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.shell.rule=Host(`micro.pizza.ew-production.ru`)"
+      - "traefik.http.routers.shell.entrypoints=websecure"
+      - "traefik.http.routers.shell.tls=true"
+      - "traefik.http.routers.shell.tls.certresolver=letsencrypt"
+      - "traefik.http.services.shell.loadbalancer.server.port=80"
+      - "traefik.http.middlewares.shell-cors.headers.accesscontrolallowmethods=GET,OPTIONS,PUT,POST,DELETE"
+      - "traefik.http.middlewares.shell-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.shell-cors.headers.accesscontrolallowheaders=*"
+      - "traefik.http.routers.shell.middlewares=shell-cors"
+
+  # ==================== FRONTEND (NON-MFE) ====================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: https://api.pizza.ew-production.ru
+    container_name: pizza-frontend
+    restart: always
+    networks:
+      - pizza_net
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=pizza_net"
+      - "traefik.http.routers.frontend.rule=Host(`pizza.ew-production.ru`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls=true"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+
+  # ==================== DISABLED SERVICES ====================
+  # ...
+
+networks:
+  pizza_net:
+    external: true
+
+volumes:
+  postgres_data:

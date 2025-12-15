@@ -10,7 +10,7 @@ import {
   IApiOrderPizza,
   IApiOrderPizzaIngredient,
 } from "@/types/api/IApiOrderGetResponse";
-import { IUserAddress } from "@/modules/profile/types/IUserAddress";
+import { IUserAddress } from "@/types/IUserAddress";
 import { IPizzaItem } from "@/types/pizza/IPizzaItem";
 import { IOrder } from "@/types/IOrder";
 

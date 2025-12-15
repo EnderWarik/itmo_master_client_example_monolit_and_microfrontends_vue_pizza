@@ -26,7 +26,7 @@ export const remotes: RemoteConfig[] = [
     },
     {
         name: 'pizzaBuilder',
-        entry: `${getEnvUrl('VITE_PIZZA_URL', 5002)}/remoteEntry.js`,
+        entry: `${getEnvUrl('VITE_PIZZA_BUILDER_URL', 5002)}/remoteEntry.js`,
         route: '/',
         title: 'Конструктор пиццы',
     },

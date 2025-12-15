@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useProfileStore } from "@/stores/profileStore";
 import AddressLine from "@/components/AddressLine.vue";
 import UserInfo from "@/components/UserInfo.vue";
@@ -47,11 +47,6 @@ import ButtonComponent from "@pizza/shared/common/components/ButtonComponent.vue
 import { AddressDraftType } from "@/types/draft";
 
 const profileStore = useProfileStore();
-
-// Load user data on mount
-onMounted(() => {
-  profileStore.init();
-});
 
 const openId = ref<number | null>(null);
 

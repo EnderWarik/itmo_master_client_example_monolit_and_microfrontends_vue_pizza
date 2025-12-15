@@ -1,51 +1,61 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -Eeuo pipefail
+# Pizza Deployment Script (Traefik + Prod Mode)
+# Run on the production server
 
-# === минимальный конфиг ===
+set -e
 
-SSH_HOST="${SSH_HOST:-85.192.56.10}"
-SSH_USER="${SSH_USER:-root}"
-SSH_PORT="${SSH_PORT:-22}"
-SSH_IDENTITY="${SSH_IDENTITY:-}"             # например: ~/.ssh/id_ed25519
-REMOTE_DIR="${REMOTE_DIR:-/root/pizza}"
-COMPOSE_FILE="${COMPOSE_FILE:-docker-compose.yml}"
-COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-pizza}"
+echo "=== Pizza Deployment Script (MTU 1280 Fix) ==="
+echo ""
 
-# === ssh/scp опции ===
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root or with sudo"
+    exit 1
+fi
 
-SSH_OPTS=(-p "${SSH_PORT}" -o StrictHostKeyChecking=accept-new)
-SCP_OPTS=(-P "${SSH_PORT}" -o StrictHostKeyChecking=accept-new)
-[[ -n "${SSH_IDENTITY}" ]] && { SSH_OPTS+=(-i "${SSH_IDENTITY}"); SCP_OPTS+=(-i "${SSH_IDENTITY}"); }
+# Prepare Traefik Let's Encrypt persistence
+echo "Setting up Let's Encrypt storage..."
+mkdir -p letsencrypt
+touch letsencrypt/acme.json
+chmod 600 letsencrypt/acme.json
 
-remote() { ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" "bash -lc 'unset DOCKER_HOST; $*'"; }
+# Stop potential conflicting containers
+echo "Stopping old containers..."
+docker stop pizza-frontend-1 pizza-backend-1 pizza-db pizza-certbot pizza-nginx spark_space_api-spark-api-1 spark_space-spark-frontend-1 spark-db traefik 2>/dev/null || true
+docker rm pizza-frontend-1 pizza-backend-1 pizza-db pizza-certbot pizza-nginx spark_space_api-spark-api-1 spark_space-spark-frontend-1 spark-db traefik 2>/dev/null || true
 
-copy_env() {
-  local src="${ENV_SRC:-.env.prod}"
-  local dest="${REMOTE_DIR}/.env"
-  if [ ! -f "${src}" ]; then
-    echo "[env] '${src}' not found, skipping upload"
-    return 0
-  fi
-  echo "[env] upload ${src} -> ${dest}"
-  ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" "mkdir -p '${REMOTE_DIR}'"
-  scp "${SCP_OPTS[@]}" "${src}" "${SSH_USER}@${SSH_HOST}:${dest}"
-}
+# Stop current project containers if running and remove orphans
+# This is crucial to release the network before removing it
+echo "Stopping current services..."
+docker compose -f docker-compose.server.yml down --remove-orphans || true
 
-echo "[1/3] copy -> ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}"
-ssh "${SSH_OPTS[@]}" "${SSH_USER}@${SSH_HOST}" "mkdir -p '${REMOTE_DIR}'"
-rsync -az --delete \
-  --exclude .git --exclude node_modules --exclude .cache --exclude dist \
-  -e "ssh ${SSH_OPTS[*]}" ./ "${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}/"
+echo "Waiting for network cleanup..."
+sleep 5
 
-copy_env
+# Recreate network with custom MTU to avoid packet loss issues
+# Using 1280 which is the safe floor (minimum IPv6 MTU), very reliable for nested VPNs
+echo "Recreating network 'pizza_net' with MTU 1280..."
+docker network rm pizza_net 2>/dev/null || true
+docker network create --driver bridge --opt com.docker.network.driver.mtu=1280 pizza_net
 
-echo "[2/3] build (docker compose build)"
-remote "cd '${REMOTE_DIR}' && docker compose -p '${COMPOSE_PROJECT_NAME}' -f '${COMPOSE_FILE}' build"
+# Verify MTU
+echo "Verifying network configuration..."
+docker network inspect pizza_net | grep "mtu" || echo "Warning: MTU setting check failed"
 
-echo "[3/3] up (docker compose up -d)"
-remote "cd '${REMOTE_DIR}' && docker compose -p '${COMPOSE_PROJECT_NAME}' -f '${COMPOSE_FILE}' up -d"
+echo ""
+echo "=== Building and starting services ==="
+# Build and start using the server compose file
+# Using --build to ensure Dockerfile.prod is built
+docker compose -f docker-compose.server.yml up -d --build --force-recreate
 
-echo "Done."
-
-
+echo ""
+echo "=== Deployment complete! ==="
+echo "Traefik is resolving certificates. It might take a minute."
+echo "Check status: docker compose -f docker-compose.server.yml ps"
+echo ""
+echo "Sites should be available at:"
+echo "  - https://builder.pizza.ew-production.ru (PIZZA BUILDER ONLY)"
+echo "  - https://api.pizza.ew-production.ru"
+echo "  - http://85.192.56.10:8080 (Direct Access)"
+echo ""

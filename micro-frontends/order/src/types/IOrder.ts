@@ -1,6 +1,6 @@
 import { IPizzaItem } from "@/types/pizza/IPizzaItem";
 import { IAdditionalCartItem } from "@/types/cart/IAdditionalCartItem";
-import { IUserAddress } from "@/modules/profile/types/IUserAddress";
+import { IUserAddress } from "@/types/IUserAddress";
 
 export interface IOrder {
   id: number;

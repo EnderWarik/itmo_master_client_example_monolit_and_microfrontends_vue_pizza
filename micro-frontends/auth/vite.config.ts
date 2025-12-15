@@ -3,7 +3,11 @@ import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import { fileURLToPath, URL } from 'node:url';
 
+// Use environment variable for production base URL
+const BASE_URL = process.env.VITE_BASE_URL || '/';
+
 export default defineConfig({
+    base: BASE_URL,
     plugins: [
         vue(),
         federation({
@@ -32,5 +36,11 @@ export default defineConfig({
     build: {
         target: 'esnext',
         minify: false,
+    },
+    experimental: {
+        renderBuiltUrl(filename: string) {
+            // Make all asset URLs absolute using BASE_URL
+            return BASE_URL + filename;
+        },
     },
 });

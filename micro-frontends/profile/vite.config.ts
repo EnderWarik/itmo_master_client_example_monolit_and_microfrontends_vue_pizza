@@ -2,14 +2,11 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import { fileURLToPath, URL } from 'node:url';
-import { existsSync } from 'node:fs';
 
-// Determine if we're in Docker (local packages path doesn't exist) or local dev
-const localSharedPath = fileURLToPath(new URL('../packages/shared/src', import.meta.url));
-const dockerSharedPath = fileURLToPath(new URL('./node_modules/@pizza/shared', import.meta.url));
-const sharedPath = existsSync(localSharedPath) ? localSharedPath : dockerSharedPath;
+const BASE_URL = process.env.VITE_BASE_URL || '/';
 
 export default defineConfig({
+    base: BASE_URL,
     plugins: [
         vue(),
         federation({
@@ -21,15 +18,16 @@ export default defineConfig({
             shared: {
                 vue: { singleton: true, requiredVersion: '^3.3.0' },
                 pinia: { singleton: true, requiredVersion: '^2.1.0' },
-                'vue-router': { singleton: true, requiredVersion: '^4.0.0' },
+                // 'vue-router': { singleton: true, requiredVersion: '^4.0.0' },
             },
         }),
     ],
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
-            '@shared': sharedPath,
-            '@pizza/shared': sharedPath,
+            // In Docker, packages/shared is copied to node_modules/@pizza/shared
+            // so we don't need manual alias for it, npm resolution works.
+            '@shared': fileURLToPath(new URL('../packages/shared/src', import.meta.url)),
         },
     },
     server: {
@@ -40,5 +38,10 @@ export default defineConfig({
     build: {
         target: 'esnext',
         minify: false,
+    },
+    experimental: {
+        renderBuiltUrl(filename: string) {
+            return BASE_URL + filename;
+        },
     },
 });

@@ -3,7 +3,10 @@ import vue from '@vitejs/plugin-vue';
 import { federation } from '@module-federation/vite';
 import { fileURLToPath, URL } from 'node:url';
 
+const BASE_URL = process.env.VITE_BASE_URL || '/';
+
 export default defineConfig({
+    base: BASE_URL,
     plugins: [
         vue(),
         federation({
@@ -32,5 +35,10 @@ export default defineConfig({
     build: {
         target: 'esnext',
         minify: false,
+    },
+    experimental: {
+        renderBuiltUrl(filename: string) {
+            return BASE_URL + filename;
+        },
     },
 });
