@@ -1,6 +1,6 @@
 # Bundle Metrics Report 📊
 
-> Generated: 2025-12-20T11:59:14.260Z
+> Generated: 2025-12-20T12:11:44.172Z
 
 ## Summary Comparison
 
@@ -8,9 +8,13 @@
 |--------|----------|-----------------|------------|
 | **Total Size (raw)** | 1.18 MB | 5.10 MB | +332.8% |
 | **Total Size (gzip)** | 621.92 KB | 1.55 MB | +155.0% |
-| **Total Size (brotli)** | 568.73 KB | 1.35 MB | +142.6% |
+| **🔹 Runtime Size (gzip)** | 621.92 KB | 1.07 MB | +76.1% |
 | **File Count** | 91 | 190 | +108.8% |
 | **JS Chunks** | 13 | 67 | +415.4% |
+
+> [!TIP]
+> **Runtime Size** — реальный размер загрузки с учётом Module Federation shared dependencies. 
+> Vue, Pinia и MF SDK загружаются только 1 раз, даже если присутствуют в каждом MFE.
 
 ---
 

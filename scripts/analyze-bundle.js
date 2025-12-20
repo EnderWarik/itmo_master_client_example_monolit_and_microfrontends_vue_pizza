@@ -26,6 +26,13 @@ const FILE_TYPES = {
     other: { extensions: [], label: 'Other' },
 };
 
+// Паттерны для определения shared-зависимостей (которые загружаются только 1 раз в runtime)
+const SHARED_PATTERNS = [
+    { pattern: 'vue.runtime', label: 'Vue Runtime' },
+    { pattern: 'pinia', label: 'Pinia' },
+    { pattern: 'index.cjs', label: 'MF SDK' },
+];
+
 /**
  * Рекурсивно получить все файлы в директории
  */
@@ -157,9 +164,50 @@ function formatSize(bytes) {
 }
 
 /**
+ * Рассчитать реальный runtime-размер (без дублирования shared-зависимостей)
+ * В runtime каждая shared-зависимость загружается только 1 раз благодаря Module Federation
+ */
+function calculateRuntimeSize(mfeCombined) {
+    const sharedDeps = {};
+    let duplicatedSize = 0;
+    let duplicatedGzip = 0;
+
+    for (const chunk of mfeCombined.chunks) {
+        for (const { pattern, label } of SHARED_PATTERNS) {
+            if (chunk.name.includes(pattern)) {
+                if (!sharedDeps[label]) {
+                    // Первое вхождение — оставляем
+                    sharedDeps[label] = {
+                        count: 1,
+                        size: chunk.size,
+                        gzip: chunk.gzip,
+                        files: [chunk.name],
+                    };
+                } else {
+                    // Дубликат — считаем как лишний
+                    sharedDeps[label].count++;
+                    sharedDeps[label].files.push(chunk.name);
+                    duplicatedSize += chunk.size;
+                    duplicatedGzip += chunk.gzip;
+                }
+                break;
+            }
+        }
+    }
+
+    return {
+        runtimeSize: mfeCombined.totalSize - duplicatedSize,
+        runtimeGzip: mfeCombined.totalGzip - duplicatedGzip,
+        duplicatedSize,
+        duplicatedGzip,
+        sharedDeps,
+    };
+}
+
+/**
  * Генерация Markdown отчёта
  */
-function generateReport(monolith, mfeCombined, mfeModules) {
+function generateReport(monolith, mfeCombined, mfeModules, runtimeMetrics) {
     const diff = (a, b) => {
         if (b === 0) return 'N/A';
         const pct = ((a - b) / b * 100).toFixed(1);
@@ -176,9 +224,13 @@ function generateReport(monolith, mfeCombined, mfeModules) {
 |--------|----------|-----------------|------------|
 | **Total Size (raw)** | ${formatSize(monolith.totalSize)} | ${formatSize(mfeCombined.totalSize)} | ${diff(mfeCombined.totalSize, monolith.totalSize)} |
 | **Total Size (gzip)** | ${formatSize(monolith.totalGzip)} | ${formatSize(mfeCombined.totalGzip)} | ${diff(mfeCombined.totalGzip, monolith.totalGzip)} |
-| **Total Size (brotli)** | ${formatSize(monolith.totalBrotli)} | ${formatSize(mfeCombined.totalBrotli)} | ${diff(mfeCombined.totalBrotli, monolith.totalBrotli)} |
+| **🔹 Runtime Size (gzip)** | ${formatSize(monolith.totalGzip)} | ${formatSize(runtimeMetrics.runtimeGzip)} | ${diff(runtimeMetrics.runtimeGzip, monolith.totalGzip)} |
 | **File Count** | ${monolith.fileCount} | ${mfeCombined.fileCount} | ${diff(mfeCombined.fileCount, monolith.fileCount)} |
 | **JS Chunks** | ${monolith.chunks.length} | ${mfeCombined.chunks.length} | ${diff(mfeCombined.chunks.length, monolith.chunks.length)} |
+
+> [!TIP]
+> **Runtime Size** — реальный размер загрузки с учётом Module Federation shared dependencies. 
+> Vue, Pinia и MF SDK загружаются только 1 раз, даже если присутствуют в каждом MFE.
 
 ---
 
@@ -396,9 +448,14 @@ function main() {
     const mfeCombined = combineMfeMetrics(mfeModules);
     console.log(`\n📊 Combined MFE: ${formatSize(mfeCombined.totalSize)} (${formatSize(mfeCombined.totalGzip)} gzip)`);
 
+    // Расчёт runtime-размера (без дублирования shared-зависимостей)
+    const runtimeMetrics = calculateRuntimeSize(mfeCombined);
+    console.log(`🔹 Runtime MFE:  ${formatSize(runtimeMetrics.runtimeSize)} (${formatSize(runtimeMetrics.runtimeGzip)} gzip)`);
+    console.log(`   (saved ${formatSize(runtimeMetrics.duplicatedGzip)} gzip from shared deps)`);
+
     // Генерация отчёта
     console.log('\n📝 Generating report...');
-    const report = generateReport(monolith, mfeCombined, mfeModules);
+    const report = generateReport(monolith, mfeCombined, mfeModules, runtimeMetrics);
     fs.writeFileSync(CONFIG.outputFile, report);
     console.log(`✅ Report saved to: ${CONFIG.outputFile}`);
 
@@ -406,11 +463,15 @@ function main() {
     console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('📊 SUMMARY');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`Monolith:     ${formatSize(monolith.totalGzip)} gzip (${monolith.chunks.length} JS chunks)`);
-    console.log(`MFE Combined: ${formatSize(mfeCombined.totalGzip)} gzip (${mfeCombined.chunks.length} JS chunks)`);
+    console.log(`Monolith:        ${formatSize(monolith.totalGzip)} gzip`);
+    console.log(`MFE (static):    ${formatSize(mfeCombined.totalGzip)} gzip (+${((mfeCombined.totalGzip - monolith.totalGzip) / monolith.totalGzip * 100).toFixed(0)}%)`);
+    console.log(`MFE (runtime):   ${formatSize(runtimeMetrics.runtimeGzip)} gzip (${runtimeMetrics.runtimeGzip < monolith.totalGzip ? '-' : '+'}${Math.abs((runtimeMetrics.runtimeGzip - monolith.totalGzip) / monolith.totalGzip * 100).toFixed(0)}%)`);
 
-    const diffPct = ((mfeCombined.totalGzip - monolith.totalGzip) / monolith.totalGzip * 100).toFixed(1);
-    console.log(`Difference:   ${diffPct > 0 ? '+' : ''}${diffPct}%`);
+    // Детали shared-зависимостей
+    console.log('\n📦 Shared Dependencies (deduplicated in runtime):');
+    for (const [label, data] of Object.entries(runtimeMetrics.sharedDeps)) {
+        console.log(`   ${label}: ${data.count}x in bundles, saved ${formatSize(data.gzip * (data.count - 1))} gzip`);
+    }
 }
 
 main();
