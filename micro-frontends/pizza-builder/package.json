@@ -16,7 +16,7 @@
         "vue-router": "^4.2.5"
     },
     "devDependencies": {
-        "@module-federation/vite": "1.9.3",
+        "@module-federation/vite": "^1.9.3",
         "@vitejs/plugin-vue": "^5.2.4",
         "sass": "^1.92.1",
         "typescript": "^5.9.2",

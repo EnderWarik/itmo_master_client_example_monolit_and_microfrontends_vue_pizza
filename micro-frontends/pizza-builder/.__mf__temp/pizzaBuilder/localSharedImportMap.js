@@ -5,12 +5,12 @@
     const importMap = {
       
         "pinia": async () => {
-          let pkg = await import("__mf__virtual/profile__prebuild__pinia__prebuild__.js");
+          let pkg = await import("__mf__virtual/pizzaBuilder__prebuild__pinia__prebuild__.js");
             return pkg;
         }
       ,
         "vue": async () => {
-          let pkg = await import("__mf__virtual/profile__prebuild__vue__prebuild__.js");
+          let pkg = await import("__mf__virtual/pizzaBuilder__prebuild__vue__prebuild__.js");
             return pkg;
         }
       
@@ -22,7 +22,7 @@
             version: "2.3.1",
             scope: ["default"],
             loaded: false,
-            from: "profile",
+            from: "pizzaBuilder",
             async get () {
               if (false) {
                 throw new Error(`Shared module '${"pinia"}' must be provided by host`);
@@ -49,10 +49,10 @@
         ,
           "vue": {
             name: "vue",
-            version: "3.5.25",
+            version: "3.5.26",
             scope: ["default"],
             loaded: false,
-            from: "profile",
+            from: "pizzaBuilder",
             async get () {
               if (false) {
                 throw new Error(`Shared module '${"vue"}' must be provided by host`);
