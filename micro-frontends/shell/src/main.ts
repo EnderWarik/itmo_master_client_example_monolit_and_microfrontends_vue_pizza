@@ -6,7 +6,6 @@ import { federationPlugin } from './plugins/federationPlugin';
 import { remotes } from './config/remotes';
 import { initAuth } from 'auth/entry';
 import { init as initCart } from 'cart/entry';
-import { preloadAllMfes } from './plugins/mfePreloader';
 
 const app = createApp(App);
 
@@ -16,10 +15,10 @@ app.use(federationPlugin, remotes);
 // Pinia для локального состояния Shell
 app.use(createPinia());
 
-// Инициализируем Auth MFE (eager loading)
+// Инициализируем Auth MFE (eager loading для проверки токена и хедера)
 initAuth().catch(console.error);
 
-// Инициализируем Cart слушатели событий
+// Инициализируем Cart слушатели событий (eager loading для pizza:add-to-cart)
 initCart();
 
 // Роутер
@@ -27,8 +26,5 @@ app.use(router);
 
 app.mount('#app');
 
-// После монтирования предзагружаем все MFE модули в фоне
-// Это позволяет MFE общаться друг с другом через события
-setTimeout(() => {
-    preloadAllMfes().catch(console.error);
-}, 100);
+// Остальные MFE (order, profile, pizza-builder) загружаются лениво
+// при переходе на соответствующую страницу через MfeLoader
