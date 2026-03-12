@@ -1,0 +1,51 @@
+flowchart LR
+    subgraph PizzaBuilder["Pizza-Builder MFE"]
+        PB_Store["pizzaStore.addToCart()"]
+        PB_UI["Кнопка В корзину"]
+    end
+
+    subgraph CartMFE["Cart MFE"]
+        Cart_Entry["entry.ts -- eager listener"]
+        Cart_Store["cartStore"]
+    end
+
+    subgraph AuthMFE["Auth MFE"]
+        Auth_Store["authStore"]
+        Auth_Login["login()"]
+        Auth_Logout["logout()"]
+    end
+
+    subgraph ShellApp["Shell"]
+        Shell_App["App.vue"]
+        Shell_Header["HeaderComponent"]
+        Shell_Router["Router"]
+    end
+
+    subgraph Storage["localStorage"]
+        LS_Cart["pizza_cart"]
+        LS_Token["auth_token"]
+    end
+
+    PB_UI -->|"клик"| PB_Store
+    PB_Store -->|"pizza:add-to-cart"| Cart_Entry
+    Cart_Entry -->|"write"| LS_Cart
+    Cart_Entry -->|"cart:total-updated"| Shell_Header
+
+    Cart_Store -->|"cart:total-updated"| Shell_Header
+    Cart_Store -->|"cart:order-complete"| Shell_App
+    Shell_App -->|"router.push('/')"| Shell_Router
+
+    PB_Store -->|"pizza:go-to-cart"| Shell_App
+    Shell_App -->|"router.push('/cart')"| Shell_Router
+
+    Auth_Login -->|"auth:login-success"| Shell_App
+    Auth_Logout -->|"auth:close"| Shell_App
+
+    Auth_Store -->|"write/read"| LS_Token
+    Cart_Store -->|"read/write"| LS_Cart
+
+    style PizzaBuilder fill:#fff3e0
+    style CartMFE fill:#e3f2fd
+    style AuthMFE fill:#e8f5e9
+    style ShellApp fill:#f3e5f5
+    style Storage fill:#fce4ec

@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant User as Пользователь
+    participant Router as Shell Router
+    participant MfeView as MfeView.vue
+    participant MfeLoader as MfeLoader.vue
+    participant MF as Module Federation Runtime
+    participant Remote as Remote Server (MFE)
+    participant MFE as MFE App (Vue instance)
+
+    User->>Router: Переход на /cart
+    Router->>MfeView: route.meta.mfe = "cart"
+    MfeView->>MfeLoader: moduleName = "cart"
+
+    Note over MfeLoader: Показывает спиннер
+
+    alt Предыдущий MFE был загружен
+        MfeLoader->>MFE: currentModule.unmount()
+        Note over MFE: app.unmount() / app = null
+    end
+
+    MfeLoader->>MF: loadRemote("cart/entry")
+    MF->>Remote: GET http://localhost:5003/remoteEntry.js
+    Remote-->>MF: remoteEntry.js (манифест)
+    MF->>Remote: GET JS-чанки модуля
+    Remote-->>MF: entry.ts chunk
+    MF-->>MfeLoader: mount, unmount, init
+
+    MfeLoader->>MFE: module.mount(div.mfe-root)
+    Note over MFE: createApp(App) / app.use(createPinia()) / app.use(router) / app.mount(container)
+
+    Note over MfeLoader: Убирает спиннер
+
+    User->>Router: Уходит со страницы
+    Router->>MfeView: другой route.meta.mfe
+    MfeView->>MfeLoader: moduleName изменился
+    MfeLoader->>MFE: currentModule.unmount()
+    Note over MFE: Полная очистка Vue-инстанса

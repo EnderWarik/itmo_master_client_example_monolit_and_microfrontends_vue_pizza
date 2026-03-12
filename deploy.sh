@@ -1,61 +1,90 @@
 #!/bin/bash
 
-# Pizza Deployment Script (Traefik + Prod Mode)
-# Run on the production server
+# Pizza Deployment Script — run from local Mac, deploy to remote server
+# Usage: ./deploy.sh
 
 set -e
 
-echo "=== Pizza Deployment Script (MTU 1280 Fix) ==="
+# ==================== CONFIG ====================
+SERVER_IP="85.192.56.10"
+SERVER_USER="root"
+SERVER_PASSWORD="3I40pPJ4UqkD"
+REMOTE_DIR="/opt/pizza"
+# ================================================
+
+SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR"
+SSH_CMD="sshpass -p '${SERVER_PASSWORD}' ssh ${SSH_OPTS} ${SERVER_USER}@${SERVER_IP}"
+RSYNC_CMD="sshpass -p '${SERVER_PASSWORD}' rsync -avz --delete -e 'ssh ${SSH_OPTS}'"
+
+echo "=== Pizza Deploy: Local → ${SERVER_IP} ==="
 echo ""
 
-# Check if running as root
-if [ "$EUID" -ne 0 ]; then
-    echo "Please run as root or with sudo"
-    exit 1
-fi
+# 1. Sync project files to server (excluding unnecessary stuff)
+echo "[1/4] Syncing project to server..."
+eval ${RSYNC_CMD} \
+    --exclude='node_modules' \
+    --exclude='.git' \
+    --exclude='.DS_Store' \
+    --exclude='.idea' \
+    --exclude='.vscode' \
+    --exclude='letsencrypt' \
+    --exclude='*.log' \
+    ./ ${SERVER_USER}@${SERVER_IP}:${REMOTE_DIR}/
 
-# Prepare Traefik Let's Encrypt persistence
-echo "Setting up Let's Encrypt storage..."
-mkdir -p letsencrypt
-touch letsencrypt/acme.json
-chmod 600 letsencrypt/acme.json
+echo ""
+echo "[2/4] Setting up Let's Encrypt storage..."
+eval ${SSH_CMD} << 'REMOTE_SCRIPT_INIT'
+mkdir -p /opt/pizza/letsencrypt
+touch /opt/pizza/letsencrypt/acme.json
+chmod 600 /opt/pizza/letsencrypt/acme.json
+REMOTE_SCRIPT_INIT
 
-# Stop potential conflicting containers
-echo "Stopping old containers..."
-docker stop pizza-frontend-1 pizza-backend-1 pizza-db pizza-certbot pizza-nginx spark_space_api-spark-api-1 spark_space-spark-frontend-1 spark-db traefik 2>/dev/null || true
-docker rm pizza-frontend-1 pizza-backend-1 pizza-db pizza-certbot pizza-nginx spark_space_api-spark-api-1 spark_space-spark-frontend-1 spark-db traefik 2>/dev/null || true
+echo ""
+echo "[3/4] Stopping old containers & recreating network..."
+eval ${SSH_CMD} << 'REMOTE_SCRIPT_NETWORK'
+cd /opt/pizza
 
-# Stop current project containers if running and remove orphans
-# This is crucial to release the network before removing it
-echo "Stopping current services..."
-docker compose -f docker-compose.server.yml down --remove-orphans || true
+# Stop current services
+docker compose -f docker-compose.server.yml down --remove-orphans 2>/dev/null || true
 
-echo "Waiting for network cleanup..."
-sleep 5
+# Stop legacy containers
+docker stop pizza-frontend-1 pizza-backend-1 pizza-db pizza-certbot pizza-nginx traefik 2>/dev/null || true
+docker rm pizza-frontend-1 pizza-backend-1 pizza-db pizza-certbot pizza-nginx traefik 2>/dev/null || true
 
-# Recreate network with custom MTU to avoid packet loss issues
-# Using 1280 which is the safe floor (minimum IPv6 MTU), very reliable for nested VPNs
-echo "Recreating network 'pizza_net' with MTU 1280..."
+sleep 3
+
+# Recreate network with MTU 1280 (fix for VPN/nested networks)
 docker network rm pizza_net 2>/dev/null || true
 docker network create --driver bridge --opt com.docker.network.driver.mtu=1280 pizza_net
-
-# Verify MTU
-echo "Verifying network configuration..."
-docker network inspect pizza_net | grep "mtu" || echo "Warning: MTU setting check failed"
+echo "Network pizza_net created with MTU 1280"
+REMOTE_SCRIPT_NETWORK
 
 echo ""
-echo "=== Building and starting services ==="
-# Build and start using the server compose file
-# Using --build to ensure Dockerfile.prod is built
-docker compose -f docker-compose.server.yml up -d --build --force-recreate
+echo "[4/4] Building services one by one..."
+SERVICES="backend frontend auth cart order profile pizza-builder shell"
+for svc in $SERVICES; do
+    echo ""
+    echo "--- Building: $svc ---"
+    eval ${SSH_CMD} "cd /opt/pizza && docker compose -f docker-compose.server.yml build ${svc}"
+done
+
+echo ""
+echo "[5/5] Starting all services..."
+eval ${SSH_CMD} "cd /opt/pizza && docker compose -f docker-compose.server.yml up -d --force-recreate"
+eval ${SSH_CMD} "cd /opt/pizza && docker compose -f docker-compose.server.yml ps"
 
 echo ""
 echo "=== Deployment complete! ==="
-echo "Traefik is resolving certificates. It might take a minute."
-echo "Check status: docker compose -f docker-compose.server.yml ps"
 echo ""
-echo "Sites should be available at:"
-echo "  - https://builder.pizza.ew-production.ru (PIZZA BUILDER ONLY)"
-echo "  - https://api.pizza.ew-production.ru"
-echo "  - http://85.192.56.10:8080 (Direct Access)"
+echo "Sites:"
+echo "  Monolith:        https://pizza.ew-production.ru"
+echo "  Micro-frontends: https://micro.pizza.ew-production.ru"
+echo "  API:             https://api.pizza.ew-production.ru"
+echo ""
+echo "MFE subdomains:"
+echo "  - https://auth.pizza.ew-production.ru"
+echo "  - https://builder.pizza.ew-production.ru"
+echo "  - https://cart.pizza.ew-production.ru"
+echo "  - https://profile.pizza.ew-production.ru"
+echo "  - https://order.pizza.ew-production.ru"
 echo ""

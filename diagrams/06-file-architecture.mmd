@@ -1,0 +1,75 @@
+graph TB
+    subgraph Root["micro-vue-third-pizza-start-source/"]
+        subgraph MF["micro-frontends/"]
+            subgraph ShellDir["shell/ -- Host :5010"]
+                S1["vite.config.ts -- remotes + shared"]
+                S2["src/main.ts -- bootstrap + eager init"]
+                S3["src/App.vue -- layout + event listeners"]
+                S4["src/router/index.ts -- route-MFE mapping"]
+                S5["src/views/MfeView.vue -- route.meta.mfe"]
+                S6["src/components/MfeLoader.vue -- mount/unmount"]
+                S7["src/plugins/federationPlugin.ts -- loadRemote()"]
+                S8["src/config/remotes.ts -- URL config"]
+                S9["src/components/Header*.vue -- хедер"]
+            end
+
+            subgraph AuthDir["auth/ -- Remote :5001"]
+                A1["vite.config.ts -- exposes: ./entry"]
+                A2["src/entry.ts -- mount/unmount/initAuth"]
+                A3["src/stores/authStore.ts -- login/logout/events"]
+                A4["src/api/authApi.ts -- HTTP client"]
+                A5["src/utils/TokenStorage.ts -- localStorage"]
+            end
+
+            subgraph PBDir["pizza-builder/ -- Remote :5002"]
+                P1["vite.config.ts -- exposes: ./entry"]
+                P2["src/entry.ts -- mount/unmount"]
+                P3["src/stores/pizzaStore.ts -- конструктор + events"]
+                P4["src/api/pizzaApi.ts -- HTTP client"]
+            end
+
+            subgraph CartDir["cart/ -- Remote :5003"]
+                C1["vite.config.ts -- exposes: ./entry"]
+                C2["src/entry.ts -- mount/unmount/init listener"]
+                C3["src/stores/cartStore.ts -- localStorage + events"]
+                C4["src/router/index.ts -- внутренний роутер"]
+            end
+
+            subgraph ProfileDir["profile/ -- Remote :5004"]
+                PR1["src/entry.ts -- mount/unmount"]
+                PR2["src/stores/profileStore.ts"]
+                PR3["src/router/index.ts -- внутренний роутер"]
+            end
+
+            subgraph OrderDir["order/ -- Remote :5005"]
+                O1["src/entry.ts -- mount/unmount"]
+                O2["src/stores/orderStore.ts"]
+            end
+
+            subgraph SharedDir["packages/shared/"]
+                SH1["package.json -- @pizza/shared"]
+                SH2["src/index.ts -- экспорт компонентов"]
+                SH3["src/common/components/ -- UI kit"]
+                SH4["src/common/types/ -- TypeScript типы"]
+                SH5["src/common/data/ -- справочники"]
+            end
+        end
+
+        subgraph BackendDir["backend/"]
+            B1["NestJS API :3000"]
+        end
+
+        subgraph Infra["Инфраструктура"]
+            N1["nginx/ -- reverse proxy"]
+            D1["docker-compose.yml"]
+            DS["deploy.sh"]
+        end
+    end
+
+    style ShellDir fill:#e8eaf6
+    style AuthDir fill:#e8f5e9
+    style PBDir fill:#fff3e0
+    style CartDir fill:#e3f2fd
+    style ProfileDir fill:#fce4ec
+    style OrderDir fill:#f3e5f5
+    style SharedDir fill:#fffde7

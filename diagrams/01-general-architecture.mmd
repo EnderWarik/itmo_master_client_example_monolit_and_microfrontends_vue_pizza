@@ -1,0 +1,45 @@
+graph TB
+    subgraph Browser["Браузер"]
+        Shell["Shell (Host) :5010"]
+    end
+
+    subgraph MFEs["Микрофронтенды (Remote)"]
+        Auth["Auth MFE :5001"]
+        PB["Pizza-Builder MFE :5002"]
+        Cart["Cart MFE :5003"]
+        Profile["Profile MFE :5004"]
+        Order["Order MFE :5005"]
+    end
+
+    subgraph Shared["Общие ресурсы"]
+        SharedPkg["@pizza/shared<br/>(Verdaccio :4873)"]
+        VueShared["vue (singleton)"]
+        PiniaShared["pinia (singleton)"]
+    end
+
+    subgraph Backend["Backend"]
+        API["NestJS API :3000"]
+        DB[(PostgreSQL)]
+    end
+
+    Shell -->|"loadRemote()"| Auth
+    Shell -->|"loadRemote()"| PB
+    Shell -->|"loadRemote()"| Cart
+    Shell -->|"loadRemote()"| Profile
+    Shell -->|"loadRemote()"| Order
+
+    Auth --> API
+    PB --> API
+    Cart --> API
+    Profile --> API
+    Order --> API
+    API --> DB
+
+    SharedPkg -.->|npm install| Auth
+    SharedPkg -.->|npm install| PB
+    SharedPkg -.->|npm install| Cart
+    SharedPkg -.->|npm install| Profile
+    SharedPkg -.->|npm install| Order
+
+    VueShared -.->|singleton| Shell
+    PiniaShared -.->|singleton| Shell

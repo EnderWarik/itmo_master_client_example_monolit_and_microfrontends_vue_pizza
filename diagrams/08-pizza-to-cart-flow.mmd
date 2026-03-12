@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant User as Пользователь
+    participant PB as PizzaBuilder
+    participant PBStore as pizzaStore
+    participant Window as window -- Event Bus
+    participant CartEntry as Cart entry.ts -- eager
+    participant LS as localStorage
+    participant Header as Shell HeaderComponent
+
+    User->>PB: Собирает пиццу, жмёт Добавить
+    PB->>PBStore: addToCart()
+
+    Note over PBStore: Формирует объект pizza: id, name, size, dough, sauce, fillings, count, price
+
+    PBStore->>Window: dispatchEvent pizza:add-to-cart detail: pizza
+    PBStore->>PBStore: resetCurrentPizza()
+
+    Window->>CartEntry: handleAddToCart(event)
+    CartEntry->>LS: getItem pizza_cart
+    LS-->>CartEntry: existing items
+    CartEntry->>CartEntry: cart.push(pizza)
+    CartEntry->>LS: setItem pizza_cart cart
+
+    Note over CartEntry: Считает total = sum price * count
+
+    CartEntry->>Window: dispatchEvent cart:total-updated detail: total
+    Window->>Header: handleCartUpdate(event)
+    Header->>Header: cartTotal.value = total
+
+    Note over Header: Обновляется счётчик в хедере

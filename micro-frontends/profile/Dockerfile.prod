@@ -4,7 +4,10 @@ WORKDIR /app
 
 # Copy shared packages
 COPY profile/package*.json ./
-RUN rm -f package-lock.json .npmrc && npm install
+# Remove @pizza/shared from deps (it's copied manually below, not from npm)
+RUN rm -f package-lock.json .npmrc && \
+    sed -i '/@pizza\/shared/d' package.json && \
+    npm install
 
 # Copy shared packages strictly after npm install to avoid pruning
 # And copy the FULL package directory to preserve 'src' folder structure

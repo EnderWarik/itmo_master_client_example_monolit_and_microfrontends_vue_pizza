@@ -13,8 +13,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { loadRemote, type MfeModule } from '@/plugins/federationPlugin';
+import {onBeforeUnmount, onMounted, ref, watch} from 'vue';
+import {loadRemote, type MfeModule} from '@/plugins/federationPlugin';
 
 const props = defineProps<{
   moduleName: string;
@@ -33,7 +33,6 @@ const mountModule = async () => {
   console.log('[MfeLoader] Mounting module:', props.moduleName);
 
   try {
-    // Сначала размонтируем предыдущий модуль
     if (currentModule) {
       currentModule.unmount();
       currentModule = null;

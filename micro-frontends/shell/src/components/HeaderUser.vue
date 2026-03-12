@@ -1,6 +1,9 @@
 <template>
   <div :class="$style.user">
-    <router-link v-if="!user" to="/login" :class="$style.login">
+    <div v-if="authLoading" :class="$style.loading">
+      <span :class="$style.spinner" />
+    </div>
+    <router-link v-else-if="!user" to="/login" :class="$style.login">
       <span>Войти</span>
     </router-link>
     <router-link v-else to="/profile" :class="$style.profile">
@@ -15,7 +18,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import { initAuth } from 'auth/entry';
 
 interface User {
   id: string;
@@ -25,6 +27,7 @@ interface User {
 }
 
 const user = ref<User | null>(null);
+const authLoading = ref(true);
 
 // Fix avatar path - strip /public prefix if present
 const fixedAvatar = computed(() => {
@@ -35,6 +38,7 @@ const fixedAvatar = computed(() => {
 function setUser(event: Event) {
   const detail = (event as CustomEvent).detail;
   user.value = detail;
+  authLoading.value = false;
 }
 
 function clearUser() {
@@ -44,14 +48,17 @@ function clearUser() {
 onMounted(async () => {
   window.addEventListener('auth:login-success', setUser);
   window.addEventListener('auth:close', clearUser);
-  
+
   try {
+    const { initAuth } = await import('auth/entry');
     const currentUser = await initAuth();
     if (currentUser) {
       user.value = currentUser;
     }
   } catch (e) {
     console.error('Failed to init auth in HeaderUser', e);
+  } finally {
+    authLoading.value = false;
   }
 });
 
@@ -118,6 +125,33 @@ onBeforeUnmount(() => {
 
   img {
     border-radius: 50%;
+  }
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+
+  &:hover:not(:active) {
+    background-color: ds-colors.$green-500 !important;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(ds-colors.$white, 0.3);
+  border-top-color: ds-colors.$white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
   }
 }
 </style>

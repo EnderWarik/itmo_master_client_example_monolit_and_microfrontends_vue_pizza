@@ -1,0 +1,37 @@
+flowchart TB
+    subgraph Level1["Уровень 1: Shell Router -- createWebHistory"]
+        URL["URL в браузере"]
+        URL -->|"/"| R1["meta.mfe = pizzaBuilder"]
+        URL -->|"/login"| R2["meta.mfe = auth -- noHeader: true"]
+        URL -->|"/cart"| R3["meta.mfe = cart"]
+        URL -->|"/order"| R4["meta.mfe = order"]
+        URL -->|"/orders"| R5["meta.mfe = order"]
+        URL -->|"/profile"| R6["meta.mfe = profile"]
+    end
+
+    R1 --> MfeView1["MfeView -> MfeLoader"]
+    R2 --> MfeView2["MfeView -> MfeLoader"]
+    R3 --> MfeView3["MfeView -> MfeLoader"]
+    R4 --> MfeView4["MfeView -> MfeLoader"]
+    R5 --> MfeView5["MfeView -> MfeLoader"]
+    R6 --> MfeView6["MfeView -> MfeLoader"]
+
+    subgraph Level2["Уровень 2: Внутренние роутеры MFE"]
+        MfeView1 --> PB_App["PizzaBuilder -- нет роутера -- один компонент"]
+        MfeView2 --> Auth_App["Auth -- нет роутера -- один компонент"]
+        MfeView3 --> Cart_Router["Cart Router -- /cart -> CartContainer"]
+        MfeView4 --> Order_App["Order -- нет роутера -- один компонент"]
+        MfeView5 --> Order_App
+        MfeView6 --> Profile_Router["Profile Router -- /profile -> ProfileContainer"]
+    end
+
+    subgraph Header["Header -- Shell"]
+        H["HeaderComponent"]
+        H --> Logo["HeaderLogo"]
+        H --> HCart["HeaderCart -- сумма корзины"]
+        H --> HUser["HeaderUser -- имя/логин"]
+    end
+
+    style Level1 fill:#e8eaf6
+    style Level2 fill:#fff8e1
+    style Header fill:#e0f2f1

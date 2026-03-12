@@ -36,7 +36,7 @@ export default defineConfig({
     },
     build: {
         target: 'esnext',
-        minify: false,
+        minify: true,
     },
     experimental: {
         renderBuiltUrl(filename: string) {

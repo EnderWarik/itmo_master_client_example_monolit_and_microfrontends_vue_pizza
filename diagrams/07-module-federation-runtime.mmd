@@ -1,0 +1,49 @@
+flowchart TB
+    subgraph Build["Этап сборки -- vite build"]
+        Auth_Build["Auth MFE build"] -->|"generates"| Auth_RE["remoteEntry.js + JS chunks"]
+        PB_Build["PizzaBuilder build"] -->|"generates"| PB_RE["remoteEntry.js + JS chunks"]
+        Cart_Build["Cart build"] -->|"generates"| Cart_RE["remoteEntry.js + JS chunks"]
+        Profile_Build["Profile build"] -->|"generates"| Profile_RE["remoteEntry.js + JS chunks"]
+        Order_Build["Order build"] -->|"generates"| Order_RE["remoteEntry.js + JS chunks"]
+    end
+
+    subgraph Runtime["Этап рантайма -- браузер"]
+        Shell_Start["Shell загрузился"]
+
+        Shell_Start -->|"eager import"| MF_Auth["MF Runtime: fetch auth/remoteEntry.js"]
+        Shell_Start -->|"eager import"| MF_Cart["MF Runtime: fetch cart/remoteEntry.js"]
+
+        MF_Auth --> Auth_RE
+        MF_Cart --> Cart_RE
+
+        Auth_RE -->|"скачивает чанки"| Auth_Module["initAuth"]
+        Cart_RE -->|"скачивает чанки"| Cart_Module["init"]
+
+        Shell_Start -->|"навигация на /"| MF_PB["MF Runtime: fetch pizzaBuilder/remoteEntry.js"]
+        MF_PB --> PB_RE
+        PB_RE -->|"скачивает чанки"| PB_Module["mount, unmount"]
+
+        Shell_Start -->|"навигация на /profile"| MF_Prof["MF Runtime: fetch profile/remoteEntry.js"]
+        MF_Prof --> Profile_RE
+        Profile_RE -->|"скачивает чанки"| Prof_Module["mount, unmount"]
+
+        Shell_Start -->|"навигация на /orders"| MF_Order["MF Runtime: fetch order/remoteEntry.js"]
+        MF_Order --> Order_RE
+        Order_RE -->|"скачивает чанки"| Order_Module["mount, unmount"]
+    end
+
+    subgraph SharedNegotiation["Shared-модули -- дедупликация"]
+        Vue_S["vue -- singleton"]
+        Pinia_S["pinia -- singleton"]
+        Note_S["Shell предоставляет vue и pinia. MFE НЕ загружают свои копии."]
+    end
+
+    Auth_Module -.-> Vue_S
+    Cart_Module -.-> Vue_S
+    PB_Module -.-> Vue_S
+    Prof_Module -.-> Vue_S
+    Order_Module -.-> Vue_S
+
+    style Build fill:#e0e0e0
+    style Runtime fill:#e8f5e9
+    style SharedNegotiation fill:#fff9c4

@@ -1,16 +1,16 @@
 # Bundle Metrics Report 📊
 
-> Generated: 2025-12-20T12:11:44.172Z
+> Generated: 2026-03-12T11:53:47.250Z
 
 ## Summary Comparison
 
 | Metric | Monolith | Micro-frontends | Difference |
 |--------|----------|-----------------|------------|
-| **Total Size (raw)** | 1.18 MB | 5.10 MB | +332.8% |
-| **Total Size (gzip)** | 621.92 KB | 1.55 MB | +155.0% |
-| **🔹 Runtime Size (gzip)** | 621.92 KB | 1.07 MB | +76.1% |
-| **File Count** | 91 | 190 | +108.8% |
-| **JS Chunks** | 13 | 67 | +415.4% |
+| **Total Size (raw)** | 1.18 MB | 3.11 MB | +163.6% |
+| **Total Size (gzip)** | 621.92 KB | 1.26 MB | +107.9% |
+| **🔹 Runtime Size (gzip)** | 621.92 KB | 998.08 KB | +60.5% |
+| **File Count** | 91 | 217 | +138.5% |
+| **JS Chunks** | 13 | 72 | +453.8% |
 
 > [!TIP]
 > **Runtime Size** — реальный размер загрузки с учётом Module Federation shared dependencies. 
@@ -34,11 +34,12 @@
 
 | Type | Files | Size (raw) | Size (gzip) |
 |------|-------|------------|-------------|
-| JavaScript | 67 | 3.69 MB | 877.48 KB |
-| CSS | 7 | 97.02 KB | 26.53 KB |
+| JavaScript | 72 | 1.71 MB | 581.97 KB |
+| CSS | 7 | 81.69 KB | 25.42 KB |
 | Images | 98 | 1.06 MB | 423.00 KB |
 | Fonts | 6 | 255.59 KB | 254.71 KB |
-| HTML | 12 | 7.95 KB | 4.45 KB |
+| HTML | 6 | 5.48 KB | 2.49 KB |
+| Other | 28 | 9.86 KB | 5.39 KB |
 
 ---
 
@@ -64,70 +65,70 @@
 
 ### Micro-frontends Breakdown
 
-#### auth (12 chunks)
+#### auth (13 chunks)
 
 | Chunk | Size (raw) | Size (gzip) |
 |-------|------------|-------------|
-| `assets/vue.runtime.esm-bundler-9RLT-tG7.js` | 295.31 KB | 68.34 KB |
-| `assets/index.cjs-DfOq2DoA.js` | 158.77 KB | 32.53 KB |
-| `assets/App.vue_vue_type_style_index_0_lang-BfeQ09dh.js` | 117.87 KB | 31.80 KB |
-| `assets/pinia-Dryfu15J.js` | 15.07 KB | 3.87 KB |
-| `remoteEntry.js` | 3.87 KB | 1.19 KB |
-| `assets/preload-helper-CKlQz3_F.js` | 2.54 KB | 1022 B |
-| `assets/index-Cy6Cgjvt.js` | 1.71 KB | 720 B |
-| `assets/entry-xHFYTZ5L.js` | 1.29 KB | 545 B |
+| `assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | 106.63 KB | 41.55 KB |
+| `assets/index.cjs-qNTcCtpj.js` | 55.86 KB | 18.12 KB |
+| `assets/App.vue_vue_type_style_index_0_lang-DQ7U4LZ0.js` | 42.56 KB | 17.30 KB |
+| `assets/pinia-DNEbwMdp.js` | 5.57 KB | 2.54 KB |
+| `assets/auth__loadShare__vue__loadShare__.mjs-B8UAhsTH.js` | 3.19 KB | 1.59 KB |
+| `remoteEntry.js` | 1.69 KB | 853 B |
+| `assets/preload-helper-CmsKOCeN.js` | 1.08 KB | 668 B |
+| `assets/index-DBkScut0.js` | 1.01 KB | 566 B |
 
-#### cart (11 chunks)
-
-| Chunk | Size (raw) | Size (gzip) |
-|-------|------------|-------------|
-| `assets/vue.runtime.esm-bundler-9RLT-tG7.js` | 295.31 KB | 68.34 KB |
-| `assets/entry-CZ37tuFV.js` | 216.05 KB | 52.43 KB |
-| `assets/index.cjs-DfOq2DoA.js` | 158.77 KB | 32.53 KB |
-| `assets/pinia-BS9i5Y3s.js` | 15.07 KB | 3.87 KB |
-| `remoteEntry.js` | 3.87 KB | 1.19 KB |
-| `assets/preload-helper-CKlQz3_F.js` | 2.54 KB | 1022 B |
-| `assets/index-CvcZH8qe.js` | 1.53 KB | 673 B |
-| `assets/virtualExposes-C0kQgcih.js` | 836 B | 439 B |
-
-#### order (11 chunks)
+#### cart (12 chunks)
 
 | Chunk | Size (raw) | Size (gzip) |
 |-------|------------|-------------|
-| `assets/vue.runtime.esm-bundler-9RLT-tG7.js` | 295.31 KB | 68.34 KB |
-| `assets/index.cjs-DfOq2DoA.js` | 158.77 KB | 32.53 KB |
-| `assets/entry-iO_aifTy.js` | 131.53 KB | 33.82 KB |
-| `assets/pinia-CKrZD1Z-.js` | 15.10 KB | 3.87 KB |
-| `remoteEntry.js` | 3.88 KB | 1.19 KB |
-| `assets/preload-helper-CKlQz3_F.js` | 2.54 KB | 1022 B |
-| `assets/index-av4Q5-mj.js` | 1.53 KB | 671 B |
-| `assets/virtualExposes-BR5YtPOi.js` | 838 B | 439 B |
+| `assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | 106.63 KB | 41.55 KB |
+| `assets/entry-COjRzln1.js` | 82.15 KB | 31.54 KB |
+| `assets/index.cjs-qNTcCtpj.js` | 55.86 KB | 18.12 KB |
+| `assets/pinia-Nq1Z_wTP.js` | 5.57 KB | 2.54 KB |
+| `assets/cart__loadShare__vue__loadShare__.mjs-MyXp1NQD.js` | 3.24 KB | 1.61 KB |
+| `remoteEntry.js` | 1.69 KB | 854 B |
+| `assets/preload-helper-Ct5FWWRu.js` | 1.21 KB | 716 B |
+| `assets/index-Dav3egBu.js` | 990 B | 543 B |
 
-#### pizza-builder (12 chunks)
-
-| Chunk | Size (raw) | Size (gzip) |
-|-------|------------|-------------|
-| `assets/vue.runtime.esm-bundler-BjP-WZdr.js` | 296.23 KB | 68.46 KB |
-| `assets/index.cjs-DfOq2DoA.js` | 158.77 KB | 32.53 KB |
-| `assets/App-fKCV-Dwl.js` | 153.86 KB | 36.45 KB |
-| `assets/pinia-Cm7pEyEH.js` | 15.32 KB | 3.88 KB |
-| `remoteEntry.js` | 3.93 KB | 1.20 KB |
-| `assets/preload-helper-CKlQz3_F.js` | 2.54 KB | 1022 B |
-| `assets/index-DdwjzA_h.js` | 1.71 KB | 707 B |
-| `assets/virtualExposes-bT7jtfW7.js` | 878 B | 458 B |
-
-#### profile (11 chunks)
+#### order (12 chunks)
 
 | Chunk | Size (raw) | Size (gzip) |
 |-------|------------|-------------|
-| `assets/vue.runtime.esm-bundler-9RLT-tG7.js` | 295.31 KB | 68.34 KB |
-| `assets/entry-D2i3vQxF.js` | 198.52 KB | 48.85 KB |
-| `assets/index.cjs-DfOq2DoA.js` | 158.77 KB | 32.53 KB |
-| `assets/pinia-BH2VxMUH.js` | 15.16 KB | 3.88 KB |
-| `remoteEntry.js` | 3.89 KB | 1.19 KB |
-| `assets/preload-helper-CKlQz3_F.js` | 2.54 KB | 1022 B |
-| `assets/index-DD3y1Vp8.js` | 1.49 KB | 656 B |
-| `assets/virtualExposes-Btk5qKv0.js` | 842 B | 440 B |
+| `assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | 106.63 KB | 41.55 KB |
+| `assets/index.cjs-qNTcCtpj.js` | 55.86 KB | 18.12 KB |
+| `assets/entry-BAiQdZug.js` | 46.65 KB | 18.83 KB |
+| `assets/pinia-pzYpfL6P.js` | 5.57 KB | 2.54 KB |
+| `assets/order__loadShare__vue__loadShare__.mjs-BuLMdZLi.js` | 3.18 KB | 1.58 KB |
+| `remoteEntry.js` | 1.69 KB | 855 B |
+| `assets/preload-helper-Ct5FWWRu.js` | 1.21 KB | 716 B |
+| `assets/index-CGzpwp6O.js` | 992 B | 541 B |
+
+#### pizza-builder (13 chunks)
+
+| Chunk | Size (raw) | Size (gzip) |
+|-------|------------|-------------|
+| `assets/vue.runtime.esm-bundler-ElFYw5cl.js` | 106.85 KB | 41.62 KB |
+| `assets/index.cjs-qNTcCtpj.js` | 55.86 KB | 18.12 KB |
+| `assets/App-BCYa1fdR.js` | 54.22 KB | 20.74 KB |
+| `assets/pinia-DUopebTn.js` | 5.57 KB | 2.55 KB |
+| `assets/pizzaBuilder__loadShare__vue__loadShare__.mjs-BNt1llOQ.js` | 3.21 KB | 1.60 KB |
+| `remoteEntry.js` | 1.72 KB | 858 B |
+| `assets/preload-helper-Ct5FWWRu.js` | 1.21 KB | 716 B |
+| `assets/index-DR9PFSfj.js` | 1017 B | 551 B |
+
+#### profile (12 chunks)
+
+| Chunk | Size (raw) | Size (gzip) |
+|-------|------------|-------------|
+| `assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | 106.63 KB | 41.55 KB |
+| `assets/entry-ClE5TE9S.js` | 74.91 KB | 29.00 KB |
+| `assets/index.cjs-qNTcCtpj.js` | 55.86 KB | 18.12 KB |
+| `assets/pinia-BWgYeYzl.js` | 5.57 KB | 2.55 KB |
+| `assets/profile__loadShare__vue__loadShare__.mjs-64cn05Z7.js` | 3.24 KB | 1.61 KB |
+| `remoteEntry.js` | 1.70 KB | 855 B |
+| `assets/preload-helper-Ct5FWWRu.js` | 1.21 KB | 716 B |
+| `assets/index-ClG8aba5.js` | 983 B | 543 B |
 
 #### shell (10 chunks)
 
@@ -135,9 +136,9 @@
 |-------|------------|-------------|
 | `assets/vue.runtime.esm-bundler-9RLT-tG7.js` | 295.31 KB | 68.34 KB |
 | `assets/shell__mf_v__runtimeInit__mf_v__-m019-Tvv.js` | 160.01 KB | 32.80 KB |
-| `assets/index-BADmEnid.js` | 77.88 KB | 18.98 KB |
+| `assets/index-BqCCsHtR.js` | 76.48 KB | 18.63 KB |
 | `assets/pinia-DTBhrspY.js` | 15.10 KB | 3.87 KB |
-| `assets/MfeView-DjYJ_9ec.js` | 4.52 KB | 1.29 KB |
+| `assets/MfeView-Bogv4k2N.js` | 4.52 KB | 1.29 KB |
 | `remoteEntry.js` | 4.34 KB | 1.27 KB |
 | `assets/preload-helper-CKlQz3_F.js` | 2.54 KB | 1022 B |
 | `assets/hostInit-B_3NnjvT.js` | 694 B | 382 B |
@@ -165,16 +166,16 @@
 
 | File | Type | Size (raw) | Size (gzip) |
 |------|------|------------|-------------|
-| `pizza-builder/assets/vue.runtime.esm-bundler-BjP-WZdr.js` | JavaScript | 296.23 KB | 68.46 KB |
-| `auth/assets/vue.runtime.esm-bundler-9RLT-tG7.js` | JavaScript | 295.31 KB | 68.34 KB |
-| `cart/assets/vue.runtime.esm-bundler-9RLT-tG7.js` | JavaScript | 295.31 KB | 68.34 KB |
-| `order/assets/vue.runtime.esm-bundler-9RLT-tG7.js` | JavaScript | 295.31 KB | 68.34 KB |
-| `profile/assets/vue.runtime.esm-bundler-9RLT-tG7.js` | JavaScript | 295.31 KB | 68.34 KB |
 | `shell/assets/vue.runtime.esm-bundler-9RLT-tG7.js` | JavaScript | 295.31 KB | 68.34 KB |
-| `cart/assets/entry-CZ37tuFV.js` | JavaScript | 216.05 KB | 52.43 KB |
-| `profile/assets/entry-D2i3vQxF.js` | JavaScript | 198.52 KB | 48.85 KB |
 | `shell/assets/shell__mf_v__runtimeInit__mf_v__-m019-Tvv.js` | JavaScript | 160.01 KB | 32.80 KB |
-| `auth/assets/index.cjs-DfOq2DoA.js` | JavaScript | 158.77 KB | 32.53 KB |
+| `pizza-builder/img/filling/parmesan.svg` | Images | 120.76 KB | 46.16 KB |
+| `shell/img/filling/parmesan.svg` | Images | 120.76 KB | 46.16 KB |
+| `pizza-builder/assets/vue.runtime.esm-bundler-ElFYw5cl.js` | JavaScript | 106.85 KB | 41.62 KB |
+| `auth/assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | JavaScript | 106.63 KB | 41.55 KB |
+| `cart/assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | JavaScript | 106.63 KB | 41.55 KB |
+| `order/assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | JavaScript | 106.63 KB | 41.55 KB |
+| `profile/assets/vue.runtime.esm-bundler-Dd2uPGwZ.js` | JavaScript | 106.63 KB | 41.55 KB |
+| `shell/assets/roboto-regular-BsN8iP2n.woff` | Fonts | 91.20 KB | 90.29 KB |
 
 ---
 
@@ -184,14 +185,14 @@
 > **Vue Runtime дублируется 6 раз** — это ожидаемо для независимых MFE, но увеличивает общий размер.
 
 > [!NOTE]
-> **Pinia дублируется 6 раз** — shared dependencies загружаются при первом использовании.
+> **Pinia дублируется 11 раз** — shared dependencies загружаются при первом использовании.
 
 > [!IMPORTANT]
-> **Module Federation Runtime**: 11 файлов, суммарно 956.27 KB
+> **Module Federation Runtime**: 6 файлов, суммарно 439.32 KB
 
 ### Initial Load Comparison
 
 | | Monolith | Shell (MFE entry) |
 |---|----------|-------------------|
-| Entry JS | 59.07 KB (gzip) | 18.98 KB (gzip) |
+| Entry JS | 59.07 KB (gzip) | 18.63 KB (gzip) |
 

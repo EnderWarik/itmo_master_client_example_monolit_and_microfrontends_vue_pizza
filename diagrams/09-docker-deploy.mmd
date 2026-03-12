@@ -1,0 +1,42 @@
+graph TB
+    subgraph Docker["docker-compose"]
+        subgraph Proxy["Nginx Reverse Proxy"]
+            NGX["nginx:80/443"]
+        end
+
+        subgraph Apps["Приложения"]
+            S["Shell :5010"]
+            A["Auth :5001"]
+            PB["Pizza-Builder :5002"]
+            C["Cart :5003"]
+            P["Profile :5004"]
+            O["Order :5005"]
+        end
+
+        subgraph Services["Сервисы"]
+            API["Backend :3000"]
+            DB[(PostgreSQL)]
+            V["Verdaccio :4873 -- npm registry"]
+        end
+    end
+
+    Client["Клиент"] -->|"HTTPS"| NGX
+    NGX -->|"/"| S
+    NGX -->|"/api"| API
+    API --> DB
+
+    S -->|"remoteEntry.js"| A
+    S -->|"remoteEntry.js"| PB
+    S -->|"remoteEntry.js"| C
+    S -->|"remoteEntry.js"| P
+    S -->|"remoteEntry.js"| O
+
+    V -.->|"@pizza/shared"| A
+    V -.->|"@pizza/shared"| PB
+    V -.->|"@pizza/shared"| C
+    V -.->|"@pizza/shared"| P
+    V -.->|"@pizza/shared"| O
+
+    style Proxy fill:#ffcc80
+    style Apps fill:#c8e6c9
+    style Services fill:#bbdefb
