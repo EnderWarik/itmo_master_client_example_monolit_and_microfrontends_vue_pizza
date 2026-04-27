@@ -1,8 +1,12 @@
 # Build stage
-FROM node:20-alpine AS builder
+# Use node:20-slim (Debian) instead of alpine — Vite 6 / Rollup 4 native bindings
+# don't work on Alpine's musl libc out of the box
+FROM node:20-slim AS builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+# Remove lockfile to force fresh install of platform-specific optional deps
+# (rollup native bindings differ between darwin-arm64 host and linux-x64 container)
+RUN rm -f package-lock.json && npm install
 COPY . .
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL

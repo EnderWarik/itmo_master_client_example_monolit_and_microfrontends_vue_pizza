@@ -1,0 +1,148 @@
+# Full local stack — runs everything in containers on localhost ports
+# Usage: docker compose -f docker-compose.local.yml up -d --build
+#
+# Ports:
+#   5432  postgres
+#   3000  backend (API)
+#   5433  monolith frontend
+#   5010  MFE shell (entry point for micro-frontend version)
+#   5001  MFE auth
+#   5002  MFE cart
+#   5003  MFE profile
+#   5004  MFE pizza-builder
+#   5005  MFE order
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pizza-db-local
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pizza
+      POSTGRES_PASSWORD: pizza_password
+      POSTGRES_DB: pizza
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pizza"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pizza-backend-local
+    restart: unless-stopped
+    environment:
+      HOST: "0.0.0.0"
+      DB_HOST: pizza-db-local
+      DB_PORT: 5432
+      DB_USER: pizza
+      DB_PASSWORD: pizza_password
+      DB_NAME: pizza
+      DATABASE_URL: postgres://pizza:pizza_password@pizza-db-local:5432/pizza
+      JWT_SECRET: local-secret
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+      args:
+        VITE_API_URL: http://localhost:3000
+    container_name: pizza-frontend-local
+    restart: unless-stopped
+    ports:
+      - "5433:80"
+    depends_on:
+      - backend
+
+  auth:
+    build:
+      context: ./micro-frontends
+      dockerfile: auth/Dockerfile.prod
+      args:
+        VITE_API_URL: http://localhost:3000
+        VITE_BASE_URL: http://localhost:5001/
+    container_name: mfe-auth-local
+    restart: unless-stopped
+    ports:
+      - "5001:80"
+
+  cart:
+    build:
+      context: ./micro-frontends
+      dockerfile: cart/Dockerfile.prod
+      args:
+        VITE_API_URL: http://localhost:3000
+        VITE_BASE_URL: http://localhost:5002/
+    container_name: mfe-cart-local
+    restart: unless-stopped
+    ports:
+      - "5002:80"
+
+  profile:
+    build:
+      context: ./micro-frontends
+      dockerfile: profile/Dockerfile.prod
+      args:
+        VITE_API_URL: http://localhost:3000
+        VITE_BASE_URL: http://localhost:5003/
+    container_name: mfe-profile-local
+    restart: unless-stopped
+    ports:
+      - "5003:80"
+
+  pizza-builder:
+    build:
+      context: ./micro-frontends
+      dockerfile: pizza-builder/Dockerfile.prod
+      args:
+        VITE_API_URL: http://localhost:3000
+        VITE_BASE_URL: http://localhost:5004/
+    container_name: mfe-pizza-builder-local
+    restart: unless-stopped
+    ports:
+      - "5004:80"
+
+  order:
+    build:
+      context: ./micro-frontends
+      dockerfile: order/Dockerfile.prod
+      args:
+        VITE_API_URL: http://localhost:3000
+        VITE_BASE_URL: http://localhost:5005/
+    container_name: mfe-order-local
+    restart: unless-stopped
+    ports:
+      - "5005:80"
+
+  shell:
+    build:
+      context: ./micro-frontends
+      dockerfile: shell/Dockerfile.prod
+      args:
+        VITE_API_URL: http://localhost:3000
+        VITE_AUTH_URL: http://localhost:5001
+        VITE_CART_URL: http://localhost:5002
+        VITE_PROFILE_URL: http://localhost:5003
+        VITE_PIZZA_BUILDER_URL: http://localhost:5004
+        VITE_ORDER_URL: http://localhost:5005
+        VITE_BASE_URL: http://localhost:5010/
+    container_name: mfe-shell-local
+    restart: unless-stopped
+    ports:
+      - "5010:80"
+    depends_on:
+      - auth
+      - cart
+      - profile
+      - pizza-builder
+      - order

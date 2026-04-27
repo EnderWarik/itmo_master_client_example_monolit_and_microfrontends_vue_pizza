@@ -5,12 +5,12 @@
     const importMap = {
       
         "pinia": async () => {
-          let pkg = await import("__mf__virtual/shell__prebuild__pinia__prebuild__.js");
+          let pkg = await import("__mf__virtual/__mfe_internal__shell__prebuild__pinia__prebuild__.js");
             return pkg;
         }
       ,
         "vue": async () => {
-          let pkg = await import("__mf__virtual/shell__prebuild__vue__prebuild__.js");
+          let pkg = await import("__mf__virtual/__mfe_internal__shell__prebuild__vue__prebuild__.js");
             return pkg;
         }
       
@@ -19,18 +19,20 @@
       
           "pinia": {
             name: "pinia",
-            version: "2.3.1",
+            version: "2.1.0",
             scope: ["default"],
             loaded: false,
-            from: "shell",
+            from: "__mfe_internal__shell",
             async get () {
               if (false) {
-                throw new Error(`Shared module '${"pinia"}' must be provided by host`);
+                throw new Error(`[Module Federation] Shared module '${"pinia"}' must be provided by host`);
               }
               usedShared["pinia"].loaded = true
               const {"pinia": pkgDynamicImport} = importMap
               const res = await pkgDynamicImport()
-              const exportModule = {...res}
+              const exportModule = false && "pinia" === "react"
+                ? (res?.default ?? res)
+                : {...res}
               // All npm packages pre-built by vite will be converted to esm
               Object.defineProperty(exportModule, "__esModule", {
                 value: true,
@@ -49,18 +51,20 @@
         ,
           "vue": {
             name: "vue",
-            version: "3.5.25",
+            version: "3.3.0",
             scope: ["default"],
             loaded: false,
-            from: "shell",
+            from: "__mfe_internal__shell",
             async get () {
               if (false) {
-                throw new Error(`Shared module '${"vue"}' must be provided by host`);
+                throw new Error(`[Module Federation] Shared module '${"vue"}' must be provided by host`);
               }
               usedShared["vue"].loaded = true
               const {"vue": pkgDynamicImport} = importMap
               const res = await pkgDynamicImport()
-              const exportModule = {...res}
+              const exportModule = false && "vue" === "react"
+                ? (res?.default ?? res)
+                : {...res}
               // All npm packages pre-built by vite will be converted to esm
               Object.defineProperty(exportModule, "__esModule", {
                 value: true,
@@ -79,6 +83,46 @@
         
     }
       const usedRemotes = [
+                {
+                  entryGlobalName: "auth",
+                  name: "auth",
+                  type: "module",
+                  entry: "http://localhost:5001/remoteEntry.js",
+                  shareScope: "default",
+                }
+          ,
+                {
+                  entryGlobalName: "cart",
+                  name: "cart",
+                  type: "module",
+                  entry: "http://localhost:5002/remoteEntry.js",
+                  shareScope: "default",
+                }
+          ,
+                {
+                  entryGlobalName: "profile",
+                  name: "profile",
+                  type: "module",
+                  entry: "http://localhost:5003/remoteEntry.js",
+                  shareScope: "default",
+                }
+          ,
+                {
+                  entryGlobalName: "order",
+                  name: "order",
+                  type: "module",
+                  entry: "http://localhost:5005/remoteEntry.js",
+                  shareScope: "default",
+                }
+          ,
+                {
+                  entryGlobalName: "pizzaBuilder",
+                  name: "pizzaBuilder",
+                  type: "module",
+                  entry: "http://localhost:5004/remoteEntry.js",
+                  shareScope: "default",
+                }
+          
       ]
       export {
         usedShared,
